@@ -1,0 +1,7 @@
+processes:
+  demo-js:
+    command: ./node_modules/.bin/esbuild --bundle --minify --format="esm" ./demo/main.ts --outfile=./demo/main.js --watch=forever
+  demo-css:
+    command: unbuffer bunx tailwindcss -m -i ./demo/tailwind.css -o ./demo/main.css --watch
+  http-server:
+    command: python -m http.server -d ./demo 4321
