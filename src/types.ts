@@ -1,27 +1,35 @@
 // types.ts
-export type Operator = 'and' | 'or' | 'not';
-export type ComparisonOperator = 'equals' | 'contains'; // add more as needed
+export type Operator = 'and' | 'or' | 'not' | 'xor';
+export type ComparisonOperator = 'equals' | 'contains' | 'greater_than' | 'less_than';
 
-export interface Condition {
+export interface BaseNode {
+  id: string;
+  not: boolean;
+}
+
+export interface Condition extends BaseNode {
+  type: 'condition';
   field: string;
   operator: ComparisonOperator;
   value: string;
-  not?: boolean;
 }
 
-export interface Group {
+export interface Group extends BaseNode {
+  type: 'group';
   operator: Operator;
-  not?: boolean;
   children: (Condition | Group)[];
+}
+
+export interface Field {
+  name: string;
+  label: string;
+  operators: ComparisonOperator[];
 }
 
 export interface FilterEditorOptions {
   container: HTMLElement | string;
   onChange?: (filter: Group) => void;
+  onError?: (error: Error) => void;
+  fields: Field[];
   initialValue?: Group;
-  fields?: Array<{
-    name: string;
-    label: string;
-    operators: ComparisonOperator[];
-  }>;
 }
