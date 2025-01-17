@@ -11,6 +11,5 @@ module.exports = {
     plugins: [
         require('daisyui'),
     ],
-    prefix: 'dlf-',
 }
 

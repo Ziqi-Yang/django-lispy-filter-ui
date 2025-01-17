@@ -1,3 +1,67 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .dlf-container {
+        @apply font-mono;
+    }
+
+    .dlf-parenthesis {
+        @apply font-extrabold;
+    }
+    
+    .dlf-operator {
+        @apply font-extrabold text-blue-700;
+    }
+
+    .dlf-not-operator {
+        @apply text-red-700;
+    }
+
+    .dlf-group {
+        @apply relative;
+    }
+
+    .dlf-group-collapse {
+        @apply flex cursor-pointer hover:text-blue-500 transition-colors;
+    }
+
+    .dlf-ellipsis {
+        @apply hidden;
+    }
+
+    .dlf-group-collapse .dlf-parenthesis:last-child {
+        @apply hidden;
+    }
+
+    .dlf-group:not(.dlf-expanded) .dlf-group-collapse .dlf-parenthesis:last-child {
+        @apply inline;
+    }
+
+    .dlf-group:not(.dlf-expanded) .dlf-indent {
+        @apply hidden;
+    }
+
+    .dlf-group:not(.dlf-expanded) .dlf-ellipsis {
+        @apply inline;
+    }
+
+    .dlf-group:not(.dlf-expanded) .dlf-indent + .dlf-parenthesis {
+        @apply hidden;
+    }
+    
+
+    .dlf-group-prefix {
+        @apply flex gap-2;
+    }
+
+    .dlf-condition {
+        @apply flex gap-2;
+    }
+    
+    .dlf-indent {
+        @apply pl-4 border-l-2 border-gray-200;
+    }
+    
+}
