@@ -57,7 +57,16 @@
     }
 
     .dlf-condition {
-        @apply flex gap-2;
+        @apply flex gap-2 items-center;
+    }
+
+    .dlf-condition select,
+    .dlf-condition input {
+        @apply bg-white border border-gray-300 rounded px-2 py-1 text-sm;
+    }
+
+    .dlf-condition input {
+        @apply min-w-[120px];
     }
     
     .dlf-indent {

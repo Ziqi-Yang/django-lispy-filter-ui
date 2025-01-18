@@ -1,35 +1,20 @@
 // types.ts
-export type Operator = 'and' | 'or' | 'not' | 'xor';
-export type ComparisonOperator = 'equals' | 'contains' | 'greater_than' | 'less_than';
+export type LogicalOperator = 'and' | 'or';
+export type ComparisonOperator = '=' | '!=' | '>' | '<' | '>=' | '<=';
 
-export interface BaseNode {
-  id: string;
-  not: boolean;
-}
-
-export interface Condition extends BaseNode {
-  type: 'condition';
-  field: string;
-  operator: ComparisonOperator;
-  value: string;
-}
-
-export interface Group extends BaseNode {
-  type: 'group';
-  operator: Operator;
-  children: (Condition | Group)[];
-}
+export type LispyCondition = [ComparisonOperator, string, string | number];
+export type LispyExpression = [LogicalOperator, ...(LispyCondition | LispyExpression)[]];
 
 export interface Field {
   name: string;
   label: string;
-  operators: ComparisonOperator[];
+  type: 'string' | 'number';
 }
 
 export interface FilterEditorOptions {
   container: HTMLElement | string;
-  onChange?: (filter: Group) => void;
+  onChange?: (filter: LispyExpression) => void;
   onError?: (error: Error) => void;
   fields: Field[];
-  initialValue?: Group;
+  initialValue?: LispyExpression;
 }

@@ -19,34 +19,15 @@ export function ready(fn) {
       onChange: (filter) => {
         console.log('Filter changed:', filter);
       },
-      initialValue: {
-        operator: 'and',
-        not: true,
-        children: [
-          {
-            field: 'field1',
-            operator: 'equals',
-            value: 'value1',
-            not: true
-          },
-          {
-            field: 'field2',
-            operator: 'contains',
-            value: 'value2'
-          },
-          {
-            operator: 'or',
-            children: [
-              {
-                field: 'field1',
-                operator: 'equals',
-                value: 'value1',
-                not: true
-              }
-            ]
-          }
-        ]
-      }
+      fields: [
+        { name: 'char__startswith', label: 'Starts with', type: 'string' },
+        { name: 'char__endswith', label: 'Ends with', type: 'string' },
+        { name: 'char__contains', label: 'Contains', type: 'string' }
+      ],
+      initialValue: ['or', 
+        ['=', 'char__startswith', 'f'],
+        ['=', 'char__startswith', 'f1']
+      ]
     });
   });
 })();
