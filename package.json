@@ -10,8 +10,7 @@
   "types": "dist/lib.d.ts",
   "files": ["dist"],
   "dependencies": {
-    "@nanostores/i18n": "^0.12.2",
-    "nanostores": "^0.11.3"
+    "i18n-js": "^4.5.1"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -1,24 +1,37 @@
-import type { FilterEditorOptions, LispyExpression, LispyCondition, LogicalOperator, ComparisonOperator } from './types';
+import type {
+  FilterEditorOptions,
+  LispyExpression,
+  LispyConditionExpr,
+  LispyOperator,
+  Schema
+} from './types';
+
+import { trans } from './trans';
 
 export class FilterEditor {
-  private static readonly OPERATORS: ComparisonOperator[] = ['=', '!=', '>', '<', '>=', '<='];
   private container: HTMLElement;
   private options: FilterEditorOptions;
   private expression: LispyExpression;
+  private schema: Schema;
 
   constructor(options: FilterEditorOptions) {
     this.options = options;
-    this.container = typeof options.container === 'string' 
+    const container = typeof options.container === 'string' 
       ? document.querySelector(options.container)! 
       : options.container;
+    
+    if (!container)
+      throw Error(`Cannot find element ${options.container}`)
+    this.container = container as HTMLElement;
         
-    this.expression = options.initialValue || ['and'];
+    this.expression = options.initialExpression || ['and'];
+    this.schema = options.schema
     this.init();
   }
 
   private init(): void {
     this.render();
-    this.attachEventListeners();
+    // this.attachEventListeners();
   }
 
   private render(): void {
@@ -30,25 +43,41 @@ export class FilterEditor {
   }
 
   private renderExpression(expr: LispyExpression): string {
-    const [operator, ...conditions] = expr;
-    const children = conditions.map(cond => 
-      Array.isArray(cond) && typeof cond[0] === 'string' && ['and', 'or'].includes(cond[0])
-        ? this.renderExpression(cond as LispyExpression)
-        : this.renderCondition(cond as LispyCondition)
-    ).join('');
+    let isNegated = false;
+    let [operator, ...subExpressions] = expr;
+
+    // Handle negation
+    if (operator === 'not') {
+      if (subExpressions.length !== 1) {
+        throw new Error('NOT expression must have exactly one subexpression');
+      }
+        
+      isNegated = true;
+      const nestedExpr = subExpressions[0];
+      [operator, ...subExpressions] = nestedExpr;
+    }
+
+    if (operator == "=") {
+      throw Error(`Wrong expression: ${expr}`)
+    }
+
+    // const children = conditions.map(cond => 
+    //   Array.isArray(cond) && typeof cond[0] === 'string' && ['and', 'or'].includes(cond[0])
+    //     ? this.renderExpression(cond as LispyExpression)
+    //     : this.renderCondition(cond as LispyCondition)
+    // ).join('');
     
     return `
     <div class="dlf-group dlf-expanded">
       <div class="dlf-group-prefix">
-        <select class="select select-sm" data-action="group-operator">
-          <option value="and" ${operator === 'and' ? 'selected' : ''}>AND</option>
-          <option value="or" ${operator === 'or' ? 'selected' : ''}>OR</option>
-        </select>
+        ${isNegated ? this.renderOperator('not') : ""}
+        ${this.renderOperator(operator)}
         <div class="dlf-group-collapse">
           <span class="dlf-parenthesis">(</span>
           <span class="dlf-ellipsis">...</span>
           <span class="dlf-parenthesis">)</span>
         </div>
+          
         <button class="btn btn-xs btn-circle btn-primary" data-action="add-group">
           <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -56,14 +85,18 @@ export class FilterEditor {
         </button>
       </div>
       <div class="dlf-indent">
-        ${children}
       </div>
       <div class="dlf-parenthesis">)</div>
     </div>
     `;
   }
 
-  private renderCondition(condition: LispyCondition): string {
+  private renderOperator(operator: LispyOperator) {
+    let tip = trans(["operator-tip", operator]);
+    return `<span class="dlf-operator dlf-${operator}-operator tooltip" data-tip="${tip}">${trans(["operator", operator])}</span>`;
+  }
+
+  private renderCondition(condition: LispyConditionExpr): string {
     const [operator, field, value] = condition;
     const fields = this.options.fields.map(f => 
       `<option value="${f.name}" ${f.name === field ? 'selected' : ''}>${f.label}</option>`
@@ -160,7 +193,7 @@ export class FilterEditor {
           current = current[path[i]];
         }
         
-        const conditionArray = current[path[path.length - 1]] as LispyCondition;
+        const conditionArray = current[path[path.length - 1]] as LispyConditionExpr;
         
         if (action === 'field') {
           conditionArray[1] = (target as HTMLSelectElement).value;
@@ -189,7 +222,7 @@ export class FilterEditor {
           current = current[path[i]];
         }
         
-        const conditionArray = current[path[path.length - 1]] as LispyCondition;
+        const conditionArray = current[path[path.length - 1]] as LispyConditionExpr;
         conditionArray[2] = target.value;
         
         this.options.onChange?.(this.expression);
@@ -230,7 +263,7 @@ export class FilterEditor {
     const path = this.findPath(afterElement);
     if (!path) return;
 
-    const newCondition: LispyCondition = ['=', this.options.fields[0].name, ''];
+    const newCondition: LispyConditionExpr = ['=', this.options.fields[0].name, ''];
     
     let current: any = this.expression;
     for (let i = 0; i < path.length - 1; i++) {

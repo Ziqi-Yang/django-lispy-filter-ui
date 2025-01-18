@@ -1,5 +1,15 @@
 import { FilterEditor } from '../src/lib';
 
+export async function fetchSchema(url: string) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+    }
+
+    const json = await response.json();
+    return json;
+}
+
 
 // import { setUpFilterEditor } from '../src/lib';
 
@@ -13,20 +23,14 @@ export function ready(fn) {
 
 
 (function() {
-  ready(() => {
+  ready(async () => {
+    const schema = await fetchSchema('http://127.0.0.1:8000/schema');
+    
     const editor = new FilterEditor({
       container: '#django-lispy-filter-editor',
-      onChange: (filter) => {
-        console.log('Filter changed:', filter);
-      },
-      fields: [
-        { name: 'char__startswith', label: 'Starts with', type: 'string' },
-        { name: 'char__endswith', label: 'Ends with', type: 'string' },
-        { name: 'char__contains', label: 'Contains', type: 'string' }
-      ],
-      initialValue: ['or', 
-        ['=', 'char__startswith', 'f'],
-        ['=', 'char__startswith', 'f1']
+      schema: schema,
+      initialExpression: [
+        "not", ["and", ["=", "char__gt", 1]]
       ]
     });
   });
