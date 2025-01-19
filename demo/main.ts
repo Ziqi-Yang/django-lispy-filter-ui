@@ -30,7 +30,7 @@ export function ready(fn) {
       container: '#django-lispy-filter-editor',
       schema: schema,
       initialExpression: [
-        "not", ["and", ["=", "char__gt", 1]]
+        "not", ["and", ["not", ["=", "char__gt", 1]]]
       ]
     });
   });

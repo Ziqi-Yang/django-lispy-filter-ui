@@ -47,3 +47,70 @@ export interface FilterEditorOptions {
   initialExpression?: LispyExpression;
 }
 
+
+
+//
+//                           AI-written type-check functions
+//
+export function isLispyOperator(value: unknown): value is LispyOperator {
+  return typeof value === 'string' && ['not', 'xor', 'and', 'or'].includes(value);
+}
+
+export function isLispyConditionExpr(expr: unknown): expr is LispyConditionExpr {
+  if (!Array.isArray(expr)) {
+    return false;
+  }
+
+  if (expr.length !== 3) {
+    return false;
+  }
+
+  if (expr[0] !== '=') {
+    return false;
+  }
+
+  if (typeof expr[1] !== 'string') {
+    return false;
+  }
+
+  const thirdElement = expr[2];
+  const isValidThirdElement = 
+        typeof thirdElement === 'string' ||
+          typeof thirdElement === 'number' ||
+          typeof thirdElement === 'boolean' ||
+          Array.isArray(thirdElement);
+
+  return isValidThirdElement;
+}
+
+export function isLispyNotExpr(expr: unknown): expr is LispyNotExpr {
+  return Array.isArray(expr) &&
+    expr.length === 2 &&
+    expr[0] === 'not' &&
+    isLispyExpression(expr[1]);
+}
+
+export function isLispyXorExpr(expr: unknown): expr is LispyXorExpr {
+  return Array.isArray(expr) &&
+    expr.length === 3 &&
+    expr[0] === 'xor' &&
+    isLispyExpression(expr[1]) &&
+    isLispyExpression(expr[2]);
+}
+
+export function isLispyAndOrExpr(expr: unknown): expr is LispyAndOrExpr {
+  if (!Array.isArray(expr) || expr.length < 2) {
+    return false;
+  }
+
+  const [operator, ...operands] = expr;
+  return (operator === 'and' || operator === 'or') &&
+    operands.every(operand => isLispyExpression(operand));
+}
+
+export export function isLispyExpression(expr: unknown): expr is LispyExpression {
+  return isLispyNotExpr(expr) ||
+    isLispyXorExpr(expr) ||
+    isLispyAndOrExpr(expr) ||
+    isLispyConditionExpr(expr);
+}

@@ -6,12 +6,9 @@ import type {
   Schema
 } from './types';
 
-import { trans } from './trans';
+import { isLispyConditionExpr, isLispyExpression } from './types';
 
-// simple function for type check
-function isLispyExpression(expr: any): expr is LispyExpression {
-  return Array.isArray(expr) && typeof expr[0] === 'string';
-}
+import { trans } from './trans';
 
 
 export class FilterEditor {
@@ -63,12 +60,17 @@ export class FilterEditor {
 
     if (operator == "=") {
       // TODO handle this situation
-      throw Error(`Wrong expression: ${expr}`)
+      const conditionExpr = [operator, ...subExpressions];
+      if (!isLispyConditionExpr(conditionExpr)) {
+        throw Error(`${conditionExpr} is a valid LispyConditionExpr!`);
+      }
+      
+      return this.renderCondition(conditionExpr, true);
     }
 
     const children = subExpressions.map(expr => {
       if (!isLispyExpression(expr)) {
-        throw new Error('Invalid expression');
+        throw new Error(`${expr} is not a valid LispyExpression`);
       }
       
       return expr[0] == "="
@@ -116,13 +118,17 @@ export class FilterEditor {
     `;
   }
 
-  private renderCondition(condition: LispyConditionExpr): string {
+  private renderCondition(
+    condition: LispyConditionExpr,
+    isNegated: boolean = false
+  ): string {
     const [field, ...lookups] = condition[1].split("__");
     const value = condition[2];
     
     
     return `
     <div class="dlf-condition group">
+      ${isNegated ? this.renderOperator('not') : ""}
       <span>${field} ${lookups} ${value}</span>
       
       <div class="invisible group-hover:visible gap-2">
