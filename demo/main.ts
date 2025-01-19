@@ -1,4 +1,4 @@
-import { FilterEditor } from '../dist/lib.js';
+import { FilterEditor } from '../dist/lib';
 
 export async function fetchSchema(url: string) {
     const response = await fetch(url);
