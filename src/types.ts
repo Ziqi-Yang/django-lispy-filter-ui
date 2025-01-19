@@ -40,8 +40,10 @@ export type LispyExpression =
 
 export type LispyOperator = 'not' | 'xor' | 'and' | 'or';
 
+
 export interface FilterEditorOptions {
   container: HTMLElement | string;
   schema: any;
   initialExpression?: LispyExpression;
 }
+

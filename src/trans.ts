@@ -11,10 +11,12 @@ export const i18n = new I18n({
     },
     "operator-tip": {
       "not": "Not",
-      "and": "",
-      "or": "",
-      "xor": "",
-    }
+      "and": "And",
+      "or": "Or",
+      "xor": "Xor",
+    },
+    "delete-condition": "Delete this condition",
+    "add-new-condition": "Add a new condition"
   },
   "zh": { // for all zh (zh-CN, etc.)
     ...zhCN
