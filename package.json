@@ -6,15 +6,23 @@
   "keywords": ["typescript", "django", "filter"],
   "license": "MIT",
   "main": "dist/lib.js",
-  "module": "dist/lib.mjs",
   "types": "dist/lib.d.ts",
   "files": ["dist"],
   "dependencies": {
     "i18n-js": "^4.5.1"
   },
+  "exports": {
+    ".":{
+      "types": "./dist/lib.d.ts",
+      "require": "./dist/lib.mjs",
+      "import": "./dist/lib.js"
+    }
+  },
   "devDependencies": {
     "@types/bun": "latest",
+    "autoprefixer": "^10.4.20",
     "daisyui": "^4.12.23",
+    "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "tsup": "^8.3.5",
     "vitest": "^2.1.8"

@@ -1,3 +1,5 @@
+import './tailwind.css';
+
 import type {
   FilterEditorOptions,
   LispyExpression,
@@ -6,7 +8,7 @@ import type {
   Schema
 } from './types';
 
-import { isLispyConditionExpr, isLispyExpression } from './types';
+import { isLispyConditionExpr, isLispyExpression, isLispyOperator } from './types';
 
 import { trans } from './trans';
 
@@ -41,7 +43,7 @@ export class FilterEditor {
 
   private render(): void {
     this.container.innerHTML = `
-    <div class="dlf-root-container">
+    <div class="dlf--root-container">
       ${this.renderExpression(this.expression)}
     </div>
     `;
@@ -83,32 +85,32 @@ export class FilterEditor {
     }).join('');
     
     return `
-    <div class="dlf-group dlf-expanded">
-      <div class="dlf-group-prefix">
+    <div class="dlf--group dlf--expanded">
+      <div class="dlf--group-prefix">
         ${isNegated ? this.renderOperator('not') : ""}
         ${this.renderOperator(operator)}
-        <div class="dlf-group-collapse">
-          <span class="dlf-parenthesis">(</span>
-          <span class="dlf-ellipsis">...</span>
-          <span class="dlf-parenthesis">)</span>
+        <div class="dlf--group-collapse">
+          <span class="dlf--parenthesis">(</span>
+          <span class="dlf--ellipsis">...</span>
+          <span class="dlf--parenthesis">)</span>
         </div>          
       </div>
         
-      <div class="dlf-indent">
+      <div class="dlf--indent">
         ${children}
         <div>
-          <div class="tooltip" data-tip="${trans('add-new-condition')}" >
-            <button class="btn btn-xs btn-circle" data-action="add-condition">
+          <div class="dlf-tooltip" data-tip="${trans('add-new-condition')}" >
+            <button class="dlf-btn dlf-btn-xs dlf-btn-circle" data-action="add-condition">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
-                class="size-4">
+                class="dlf-size-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
             </button>
           </div>
         </div>
       </div>
-      <div class="dlf-parenthesis">)</div>
+      <div class="dlf--parenthesis">)</div>
     </div>
     `;
   }
@@ -116,7 +118,7 @@ export class FilterEditor {
   private renderOperator(operator: LispyOperator) {
     let tip = trans(["operator-tip", operator]);
     return `
-    <span class="dlf-operator dlf-${operator}-operator tooltip" data-tip="${tip}">
+    <span class="dlf--operator dlf--${operator}-operator dlf-tooltip" data-tip="${tip}">
       ${trans(["operator", operator])}
     </span>
     `;
@@ -131,16 +133,16 @@ export class FilterEditor {
     
     
     return `
-    <div class="dlf-condition group">
+    <div class="dlf--condition dlf-group">
       ${isNegated ? this.renderOperator('not') : ""}
       <span>${field} ${lookups} ${value}</span>
       
-      <div class="invisible group-hover:visible gap-2">
+      <div class="dlf-invisible group-hover:dlf-visible gap-2">
         <div class="tooltip" data-tip="${trans('delete-condition')}">
-          <button class="btn btn-xs btn-circle" data-action="delete-condition">
+          <button class="dlf-btn dlf-btn-xs dlf-btn-circle" data-action="delete-condition">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
               stroke-width="2.5" stroke="currentColor"
-              class="size-4">
+              class="dlf-size-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
           </button>
@@ -154,10 +156,10 @@ export class FilterEditor {
     this.container.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       
-      if (target.closest('.dlf-group-collapse')) {
-        const group = target.closest('.dlf-group');
+      if (target.closest('.dlf--group-collapse')) {
+        const group = target.closest('.dlf--group');
         if (group) {
-          group.classList.toggle('dlf-expanded');
+          group.classList.toggle('dlf--expanded');
         }
         return;
       }
@@ -177,15 +179,15 @@ export class FilterEditor {
         return;
       }
 
-      const operatorElem = target.closest('.dlf-operator');
-      if (operatorElem && operatorElem.closest('.dlf-group-prefix')) {
+      const operatorElem = target.closest('.dlf--operator');
+      if (operatorElem && operatorElem.closest('.dlf--group-prefix')) {
         new OperatorSelect(operatorElem as HTMLElement);
       }
     });
   }
 
   public toJson(): LispyExpression {
-    const rootGroup = this.container.querySelector('.dlf-group');
+    const rootGroup = this.container.querySelector('.dlf--group');
     if (!rootGroup) {
       return ['and']; // Default empty expression
     }
@@ -194,39 +196,41 @@ export class FilterEditor {
 
   private parseGroup(groupElement: Element): LispyExpression {
     const operators = Array.from(
-      groupElement.querySelectorAll('.dlf-group-prefix .dlf-operator')
+      groupElement.querySelectorAll('.dlf--group-prefix .dlf--operator')
     ).map(op => op.classList.toString());
 
     // Check if this group is negated
-    const isNegated = operators.some(cls => cls.includes('dlf-not-operator'));
+    const isNegated = operators.some(cls => cls.includes('dlf--not-operator'));
     
     // Get the main operator (and/or/xor)
     const mainOperator = operators.find(cls => 
-      ['dlf-and-operator', 'dlf-or-operator', 'dlf-xor-operator'].some(op => cls.includes(op))
+      ['dlf--and-operator', 'dlf--or-operator', 'dlf--xor-operator'].some(op => cls.includes(op))
     );
     
     const operator = mainOperator
-      ?.match(/dlf-(and|or|xor)-operator/)?.[1] || 'and';
+      ?.match(/dlf--(and|or|xor)-operator/)?.[1] || 'and';
 
     // Parse all conditions and nested groups
-    const indent = groupElement.querySelector('.dlf-indent');
+    const indent = groupElement.querySelector('.dlf--indent');
     if (!indent) {
-      return [operator];
+      // @ts-ignore
+      return [operator]; 
     }
 
     const children = Array.from(indent.children)
       .filter(child => 
-        child.classList.contains('dlf-condition') || 
-        child.classList.contains('dlf-group')
+        child.classList.contains('dlf--condition') || 
+        child.classList.contains('dlf--group')
       )
       .map(child => {
-        if (child.classList.contains('dlf-condition')) {
+        if (child.classList.contains('dlf--condition')) {
           return this.parseCondition(child);
         } else {
           return this.parseGroup(child);
         }
       });
 
+    // @ts-ignore
     const expression: LispyExpression = [operator, ...children];
     
     // Wrap in NOT if negated
