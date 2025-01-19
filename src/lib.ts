@@ -10,6 +10,8 @@ import { isLispyConditionExpr, isLispyExpression } from './types';
 
 import { trans } from './trans';
 
+import { OperatorSelect } from './components/operator-selector';
+
 
 export class FilterEditor {
   private container: HTMLElement;
@@ -33,6 +35,8 @@ export class FilterEditor {
   private init(): void {
     this.render();
     this.attachEventListeners();
+
+    console.log(this.toJson());
   }
 
   private render(): void {
@@ -94,7 +98,7 @@ export class FilterEditor {
         ${children}
         <div>
           <div class="tooltip" data-tip="${trans('add-new-condition')}" >
-            <button class="btn btn-xs btn-circle" data-action="add-group">
+            <button class="btn btn-xs btn-circle" data-action="add-condition">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
                 class="size-4">
@@ -133,7 +137,7 @@ export class FilterEditor {
       
       <div class="invisible group-hover:visible gap-2">
         <div class="tooltip" data-tip="${trans('delete-condition')}">
-          <button class="btn btn-xs btn-circle" data-action="delete">
+          <button class="btn btn-xs btn-circle" data-action="delete-condition">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
               stroke-width="2.5" stroke="currentColor"
               class="size-4">
@@ -149,9 +153,6 @@ export class FilterEditor {
   private attachEventListeners(): void {
     this.container.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      const button = target.closest('button');
-
-      console.log(target, button);
       
       if (target.closest('.dlf-group-collapse')) {
         const group = target.closest('.dlf-group');
@@ -161,26 +162,93 @@ export class FilterEditor {
         return;
       }
 
-      // if (!button) return;
+      const button = target.closest('button');
+      if (button) {
+        const action = button.dataset.action;
 
-      // const action = button.dataset.action;
-      
-      // if (action === 'add-group') {
-      //   const group = button.closest('.dlf-group');
-      //   if (group) {
-      //     this.addGroup(group);
-      //   }
-      //   return;
-      // }
+        switch (action) {
+          case 'add-condition':
+            console.log('add');
+            break;
+          case 'delete-condition':
+            console.log('delete');
+            break;
+        }
+        return;
+      }
 
-      // const condition = button.closest('.dlf-condition');
-      // if (!condition) return;
-      
-      // if (action === 'delete') {
-      //   this.deleteCondition(condition);
-      // } else if (action === 'add') {
-      //   this.addCondition(condition);
-      // }
+      const operatorElem = target.closest('.dlf-operator');
+      if (operatorElem && operatorElem.closest('.dlf-group-prefix')) {
+        new OperatorSelect(operatorElem as HTMLElement);
+      }
     });
   }
+
+  public toJson(): LispyExpression {
+    const rootGroup = this.container.querySelector('.dlf-group');
+    if (!rootGroup) {
+      return ['and']; // Default empty expression
+    }
+    return this.parseGroup(rootGroup);
+  }
+
+  private parseGroup(groupElement: Element): LispyExpression {
+    const operators = Array.from(
+      groupElement.querySelectorAll('.dlf-group-prefix .dlf-operator')
+    ).map(op => op.classList.toString());
+
+    // Check if this group is negated
+    const isNegated = operators.some(cls => cls.includes('dlf-not-operator'));
+    
+    // Get the main operator (and/or/xor)
+    const mainOperator = operators.find(cls => 
+      ['dlf-and-operator', 'dlf-or-operator', 'dlf-xor-operator'].some(op => cls.includes(op))
+    );
+    
+    const operator = mainOperator
+      ?.match(/dlf-(and|or|xor)-operator/)?.[1] || 'and';
+
+    // Parse all conditions and nested groups
+    const indent = groupElement.querySelector('.dlf-indent');
+    if (!indent) {
+      return [operator];
+    }
+
+    const children = Array.from(indent.children)
+      .filter(child => 
+        child.classList.contains('dlf-condition') || 
+        child.classList.contains('dlf-group')
+      )
+      .map(child => {
+        if (child.classList.contains('dlf-condition')) {
+          return this.parseCondition(child);
+        } else {
+          return this.parseGroup(child);
+        }
+      });
+
+    const expression: LispyExpression = [operator, ...children];
+    
+    // Wrap in NOT if negated
+    return isNegated ? ['not', expression] : expression;
+  }
+
+  private parseCondition(conditionElement: Element): LispyExpression {
+    const isNegated = conditionElement
+
+
+
+    // For demo, just extract the text content
+    // In real implementation, you'll want to parse the actual field and value
+    const text = conditionElement.textContent?.trim() || '';
+    const parts = text.split(' ').filter(Boolean);
+    
+    // Create a basic condition expression
+    // This is a simplified version - you'll need to adjust based on your actual condition format
+    const condition: LispyConditionExpr = ['=', parts[0], parts[parts.length - 1]];
+    
+    return isNegated ? ['not', condition] : condition;
+  }
 }
+
+

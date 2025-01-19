@@ -108,7 +108,7 @@ export function isLispyAndOrExpr(expr: unknown): expr is LispyAndOrExpr {
     operands.every(operand => isLispyExpression(operand));
 }
 
-export export function isLispyExpression(expr: unknown): expr is LispyExpression {
+export function isLispyExpression(expr: unknown): expr is LispyExpression {
   return isLispyNotExpr(expr) ||
     isLispyXorExpr(expr) ||
     isLispyAndOrExpr(expr) ||
