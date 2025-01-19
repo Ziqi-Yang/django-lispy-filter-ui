@@ -1,7 +1,6 @@
 interface OperatorOption {
     value: string;
     display: string;
-    class: string;
 }
 
 
@@ -11,10 +10,10 @@ export class OperatorSelect {
     private selectElement: HTMLDivElement | null = null;
 
     private options: OperatorOption[] = [
-        { value: 'not', display: 'Not', class: 'dlf-not-operator' },
-        { value: 'and', display: 'And', class: '' },
-        { value: 'or', display: 'Or', class: '' },
-        { value: 'xor', display: 'Xor', class: '' },
+        { value: 'not', display: 'Not'},
+        { value: 'and', display: 'And'},
+        { value: 'or', display: 'Or'},
+        { value: 'xor', display: 'Xor'},
     ];
 
     constructor(element: HTMLElement) {
@@ -24,11 +23,11 @@ export class OperatorSelect {
 
     private createSelect(): HTMLDivElement {
         const select = document.createElement('div');
-        select.className = 'absolute bg-white border border-gray-300 rounded shadow-lg z-50';
+        select.className = 'dlf:absolute dlf:bg-white dlf:border dlf:border-gray-300 dlf:rounded dlf:shadow-lg dlf:z-50';
         
         this.options.forEach(option => {
             const optionElement = document.createElement('div');
-            optionElement.className = `dlf-operator ${option.class} cursor-pointer p-2 hover:bg-gray-100`;
+            optionElement.className = `dlf-operator dlf-${option.value}-operator dlf:cursor-pointer dlf:p-2 dlf:hover:bg-gray-100`;
             optionElement.textContent = option.display;
             optionElement.setAttribute('data-value', option.value);
             
@@ -78,7 +77,7 @@ export class OperatorSelect {
 
     private selectOption(option: OperatorOption): void {
         this.element.textContent = option.display;
-        this.element.className = `dlf-operator ${option.class} tooltip`;
+        this.element.className = `dlf-operator dlf-${option.value}-operator dlf:tooltip`;
         this.element.setAttribute('data-value', option.value);
         this.element.setAttribute('data-tip', option.display);
         this.closeSelect();

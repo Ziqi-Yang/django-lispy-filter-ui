@@ -1,67 +1,69 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" prefix(dlf) source("./");
+@plugin "daisyui";
+
+@layer theme, base, components, utilities;
+
 
 @layer components {
-    .dlf--container {
-        @apply dlf-font-mono;
+    .dlf-root-container {
+        @apply dlf:font-mono;
     }
 
-    .dlf--parenthesis {
-        @apply dlf-font-extrabold;
+    .dlf-parenthesis {
+        @apply dlf:font-extrabold;
     }
     
-    .dlf--operator {
-        @apply dlf-font-extrabold dlf-text-blue-700;
+    .dlf-operator {
+        @apply dlf:font-extrabold dlf:text-blue-700;
     }
 
-    .dlf--not-operator {
-        @apply dlf-text-red-700;
+    .dlf-not-operator {
+        @apply dlf:text-red-700;
     }
 
-    .dlf--group {
-        @apply dlf-relative;
+    .dlf-group {
+        @apply dlf:relative;
     }
 
-    .dlf--group-collapse {
-        @apply dlf-flex dlf-cursor-pointer hover:dlf-text-blue-500 dlf-transition-colors;
+    .dlf-group-collapse {
+        @apply dlf:flex dlf:cursor-pointer dlf:hover:text-blue-500 dlf:transition-colors;
     }
 
-    .dlf--ellipsis {
-        @apply dlf-hidden;
+    .dlf-ellipsis {
+        @apply dlf:hidden;
     }
 
-    .dlf--group-collapse .dlf--parenthesis:last-child {
-        @apply dlf-hidden;
+    .dlf-group-collapse .dlf-parenthesis:last-child {
+        @apply dlf:hidden;
     }
 
-    .dlf--group:not(.dlf--expanded) .dlf--group-collapse .dlf--parenthesis:last-child {
-        @apply dlf-inline;
+    .dlf-group:not(.dlf:-expanded) .dlf-group-collapse .dlf-parenthesis:last-child {
+        @apply dlf:inline;
     }
 
-    .dlf--group:not(.dlf--expanded) .dlf--indent {
-        @apply dlf-hidden;
+    .dlf-group:not(.dlf:-expanded) .dlf-indent {
+        @apply dlf:hidden;
     }
 
-    .dlf--group:not(.dlf--expanded) .dlf--ellipsis {
-        @apply dlf-inline;
+    .dlf-group:not(.dlf:-expanded) .dlf-ellipsis {
+        @apply dlf:inline;
     }
 
-    .dlf--group:not(.dlf--expanded) .dlf--indent + .dlf--parenthesis {
-        @apply dlf-hidden;
+    .dlf-group:not(.dlf:-expanded) .dlf-indent + .dlf-parenthesis {
+        @apply dlf:hidden;
     }
     
 
-    .dlf--group-prefix {
-        @apply dlf-flex dlf-gap-2;
+    .dlf-group-prefix {
+        @apply dlf:flex dlf:gap-2;
     }
 
-    .dlf--condition {
-        @apply dlf-flex dlf-gap-2 dlf-items-center;
+    .dlf-condition {
+        @apply dlf:flex dlf:gap-2 dlf:items-center;
     }
     
-    .dlf--indent {
-        @apply dlf-pl-4 dlf-border-l-2 dlf-border-gray-200;
+    .dlf-indent {
+        @apply dlf:pl-4 dlf:border-l-2 dlf:border-gray-200;
     }
     
 }
