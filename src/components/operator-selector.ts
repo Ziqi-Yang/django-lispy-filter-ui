@@ -10,10 +10,8 @@ export class OperatorSelect {
     private selectElement: HTMLDivElement | null = null;
 
     private options: OperatorOption[] = [
-        { value: 'not', display: 'Not'},
         { value: 'and', display: 'And'},
         { value: 'or', display: 'Or'},
-        { value: 'xor', display: 'Xor'},
     ];
 
     constructor(element: HTMLElement) {

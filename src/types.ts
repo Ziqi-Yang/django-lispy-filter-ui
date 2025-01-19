@@ -29,16 +29,14 @@ export type LispyFunction = StringAndOthers<unknown[]>;
 export type LispyConditionExpr = readonly ['=', string, string | number | boolean | LispyFunction];
 
 type LispyNotExpr = ['not', LispyExpression];
-type LispyXorExpr = ['xor', LispyExpression, LispyExpression];
 type LispyAndOrExpr = ['and' | 'or', ...LispyExpression[]];
 
 export type LispyExpression = 
   | LispyNotExpr 
-  | LispyXorExpr 
   | LispyAndOrExpr
   | LispyConditionExpr;
 
-export type LispyOperator = 'not' | 'xor' | 'and' | 'or';
+export type LispyOperator = 'not' | 'and' | 'or';
 
 
 export interface FilterEditorOptions {
@@ -90,13 +88,6 @@ export function isLispyNotExpr(expr: unknown): expr is LispyNotExpr {
     isLispyExpression(expr[1]);
 }
 
-export function isLispyXorExpr(expr: unknown): expr is LispyXorExpr {
-  return Array.isArray(expr) &&
-    expr.length === 3 &&
-    expr[0] === 'xor' &&
-    isLispyExpression(expr[1]) &&
-    isLispyExpression(expr[2]);
-}
 
 export function isLispyAndOrExpr(expr: unknown): expr is LispyAndOrExpr {
   if (!Array.isArray(expr) || expr.length < 2) {
@@ -110,7 +101,6 @@ export function isLispyAndOrExpr(expr: unknown): expr is LispyAndOrExpr {
 
 export function isLispyExpression(expr: unknown): expr is LispyExpression {
   return isLispyNotExpr(expr) ||
-    isLispyXorExpr(expr) ||
     isLispyAndOrExpr(expr) ||
     isLispyConditionExpr(expr);
 }

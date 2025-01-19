@@ -5,20 +5,16 @@
 
 
 @layer components {
-    .dlf-root-container {
-        @apply dlf:font-mono;
-    }
-
     .dlf-parenthesis {
         @apply dlf:font-extrabold;
     }
     
     .dlf-operator {
-        @apply dlf:font-extrabold dlf:text-blue-700;
+        @apply dlf:font-extrabold dlf:text-blue-700 dlf:cursor-pointer;
     }
 
     .dlf-not-operator {
-        @apply dlf:text-red-700;
+        @apply dlf:text-red-700 dlf:cursor-auto;
     }
 
     .dlf-group {

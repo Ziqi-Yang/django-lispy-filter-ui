@@ -180,7 +180,7 @@ export class FilterEditor {
       }
 
       const operatorElem = target.closest('.dlf-operator');
-      if (operatorElem && operatorElem.closest('.dlf-group-prefix')) {
+      if (operatorElem && !operatorElem.classList.contains("dlf-not-operator")) {
         new OperatorSelect(operatorElem as HTMLElement);
       }
     });
