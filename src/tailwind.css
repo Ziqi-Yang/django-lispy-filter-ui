@@ -1,22 +1,30 @@
-@import "tailwindcss" prefix(dlf) source("./");
-@plugin "daisyui";
-
 @layer theme, base, components, utilities;
+/* Don't include tailwind preflight (base style)*/
+@import "tailwindcss/theme" layer(theme) prefix(dlf) source("./");
+@import "tailwindcss/utilities" layer(utilities) prefix(dlf) source("./");
+
+/* dlf:tooltip */
+@utility tooltip {
+    @apply dlf:relative dlf:inline-block;
+
+    &::before {
+        @apply dlf:absolute dlf:bottom-full dlf:left-1/2 dlf:-translate-x-1/2 dlf:px-2;
+        @apply dlf:py-1 dlf:bg-slate-100 dlf:text-black dlf:text-sm dlf:rounded;
+        @apply dlf:whitespace-nowrap dlf:opacity-0 dlf:invisible dlf:transition-all;
+        @apply dlf:duration-200 dlf:ease-in-out dlf:shadow;
+        content: attr(data-tip);
+    }
+
+    &:hover::before {
+        @apply dlf:opacity-100 dlf:visible;
+    }
+}
 
 
 @layer components {
-    .dlf-parenthesis {
-        @apply dlf:font-extrabold;
-    }
+    .dlf-root-container {}
+
     
-    .dlf-operator {
-        @apply dlf:font-extrabold dlf:text-blue-700 dlf:cursor-pointer;
-    }
-
-    .dlf-not-operator {
-        @apply dlf:text-red-700 dlf:cursor-auto;
-    }
-
     .dlf-group {
         @apply dlf:relative;
     }
@@ -54,6 +62,22 @@
         @apply dlf:flex dlf:gap-2;
     }
 
+    
+    
+    .dlf-parenthesis {
+        @apply dlf:font-extrabold;
+    }
+    
+    
+    .dlf-operator {
+        @apply dlf:font-extrabold dlf:text-blue-700 dlf:cursor-pointer;
+    }
+
+    .dlf-not-operator {
+        @apply dlf:text-red-700 dlf:cursor-auto;
+    }
+
+
     .dlf-condition {
         @apply dlf:flex dlf:gap-2 dlf:items-center;
     }
@@ -61,5 +85,13 @@
     .dlf-indent {
         @apply dlf:pl-4 dlf:border-l-2 dlf:border-gray-200;
     }
+
     
+    .dlf-icon-button {
+        @apply dlf:inline-block dlf:rounded-full dlf:border dlf:p-1;
+        @apply dlf:border-slate-600 dlf:bg-slate-600 dlf:text-white;
+        @apply dlf:hover:text-slate-600 dlf:active:text-slate-500 dlf:hover:bg-transparent;
+        @apply dlf:focus:outline-none dlf:focus:ring;
+        @apply dlf:cursor-pointer;
+    }
 }

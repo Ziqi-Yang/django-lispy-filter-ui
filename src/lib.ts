@@ -14,7 +14,6 @@ import { trans } from './trans';
 
 import { OperatorSelect } from './components/operator-selector';
 
-
 export class FilterEditor {
   private container: HTMLElement;
   private expression: LispyExpression;
@@ -100,7 +99,7 @@ export class FilterEditor {
         ${children}
         <div>
           <div class="dlf:tooltip" data-tip="${trans('add-new-condition')}" >
-            <button class="dlf:btn dlf:btn-xs dlf:btn-circle" data-action="add-condition">
+          <button class="dlf-icon-button" data-action="add-condition">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
                 class="dlf:size-4">
@@ -138,8 +137,8 @@ export class FilterEditor {
       <span>${field} ${lookups} ${value}</span>
       
       <div class="dlf:invisible dlf:group-hover:visible gap-2">
-        <div class="tooltip" data-tip="${trans('delete-condition')}">
-          <button class="dlf:btn dlf:btn-xs dlf:btn-circle" data-action="delete-condition">
+        <div class="dlf:tooltip" data-tip="${trans('delete-condition')}">
+          <button class="dlf-icon-button" data-action="delete-condition">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
               stroke-width="2.5" stroke="currentColor"
               class="dlf:size-4">

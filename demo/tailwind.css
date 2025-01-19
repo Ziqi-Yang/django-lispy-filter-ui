@@ -1,2 +1,9 @@
-@import "tailwindcss" source("./");
 @layer theme, base, components, utilities;
+@import "tailwindcss" source("./");
+
+/* @layer theme, base, components, utilities; */
+/* /\* @import "tailwindcss" prefix(dlf) source("./"); *\/ */
+/* /\* Don't include preflight (base style)*\/ */
+/* @import "tailwindcss/theme" layer(theme) prefix(dlf) source("./"); */
+/* @import "tailwindcss/utilities" layer(utilities) prefix(dlf) source("./"); */
+
