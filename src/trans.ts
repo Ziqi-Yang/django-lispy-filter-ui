@@ -16,7 +16,8 @@ export const i18n = new I18n({
       "xor": "Xor",
     },
     "delete-condition": "Delete this condition",
-    "add-new-condition": "Add a new condition"
+    "add-new-condition": "Add a new condition",
+    "toggle-not": "Toggle not operator",
   },
   "zh": { // for all zh (zh-CN, etc.)
     ...zhCN

@@ -13,6 +13,7 @@ import { isLispyConditionExpr, isLispyExpression, isLispyOperator } from './type
 import { trans } from './trans';
 
 import { OperatorSelect } from './components/operator-selector';
+import { html2node } from './utils';
 
 export class FilterEditor {
   private container: HTMLElement;
@@ -64,7 +65,6 @@ export class FilterEditor {
     }
 
     if (operator == "=") {
-      // TODO handle this situation
       const conditionExpr = [operator, ...subExpressions];
       if (!isLispyConditionExpr(conditionExpr)) {
         throw Error(`${conditionExpr} is a valid LispyConditionExpr!`);
@@ -93,13 +93,23 @@ export class FilterEditor {
           <span class="dlf-ellipsis">...</span>
           <span class="dlf-parenthesis">)</span>
         </div>          
+        <div>
+          <div class="dlf:tooltip" data-tip="${trans('toggle-not')}" >
+            <button class="dlf-icon-button" data-action="toggle-not">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                  stroke-width="1.5" stroke="currentColor" class="dlf:size-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                </svg>
+            </button>
+          </div>
+        </div>
       </div>
         
       <div class="dlf-indent">
         ${children}
         <div>
           <div class="dlf:tooltip" data-tip="${trans('add-new-condition')}" >
-          <button class="dlf-icon-button" data-action="add-condition">
+            <button class="dlf-icon-button" data-action="add-condition">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
                 class="dlf:size-4">
@@ -117,7 +127,8 @@ export class FilterEditor {
   private renderOperator(operator: LispyOperator) {
     let tip = trans(["operator-tip", operator]);
     return `
-    <span class="dlf-operator dlf-${operator}-operator dlf:tooltip" data-tip="${tip}">
+    <span class="dlf-operator dlf-${operator}-operator dlf:tooltip" data-tip="${tip}"
+      data-value="${operator}">
       ${trans(["operator", operator])}
     </span>
     `;
@@ -137,6 +148,7 @@ export class FilterEditor {
       <span>${field} ${lookups} ${value}</span>
       
       <div class="dlf:invisible dlf:group-hover:visible gap-2">
+
         <div class="dlf:tooltip" data-tip="${trans('delete-condition')}">
           <button class="dlf-icon-button" data-action="delete-condition">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -144,6 +156,15 @@ export class FilterEditor {
               class="dlf:size-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
+          </button>
+        </div>
+
+        <div class="dlf:tooltip" data-tip="${trans('toggle-not')}" >
+          <button class="dlf-icon-button" data-action="toggle-not">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="1.5" stroke="currentColor" class="dlf:size-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+              </svg>
           </button>
         </div>
       </div>
@@ -163,9 +184,9 @@ export class FilterEditor {
         return;
       }
 
-      const button = target.closest('button');
-      if (button) {
-        const action = button.dataset.action;
+      const btnElem = target.closest('button');
+      if (btnElem) {
+        const action = btnElem.dataset.action;
 
         switch (action) {
           case 'add-condition':
@@ -173,6 +194,9 @@ export class FilterEditor {
             break;
           case 'delete-condition':
             console.log('delete');
+            break;
+          case 'toggle-not':
+            this.toggleNot(btnElem);
             break;
         }
         return;
@@ -183,6 +207,26 @@ export class FilterEditor {
         new OperatorSelect(operatorElem as HTMLElement);
       }
     });
+  }
+
+  private toggleNot(btnElem: HTMLElement) {
+    const closestConditionElem = btnElem.closest(".dlf-condition");
+    let parentElem = null;
+    if (closestConditionElem) {
+      parentElem = closestConditionElem;
+    } else {
+      parentElem = btnElem.closest(".dlf-group-prefix");
+    }
+    if (!parentElem) {
+      throw new Error("While executing 'toggle-not' action, parent element canot be found!")
+    }
+
+    const notOpElem = parentElem.querySelector(".dlf-not-operator");
+    if (notOpElem) {
+      notOpElem.remove();
+    } else {
+      parentElem.insertBefore(html2node(this.renderOperator("not")), parentElem.firstChild);
+    }
   }
 
   public toJson(): LispyExpression {

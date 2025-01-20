@@ -1,24 +1,24 @@
 import { FilterEditor } from '../dist/lib';
 
 export async function fetchSchema(url: string) {
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
-    }
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Response status: ${response.status}`);
+  }
 
-    const json = await response.json();
-    return json;
+  const json = await response.json();
+  return json;
 }
 
 
 // import { setUpFilterEditor } from '../src/lib';
 
 export function ready(fn) {
-    if (document.readyState !== 'loading') {
-        fn();
-    } else {
-        document.addEventListener('DOMContentLoaded', fn);
-    }
+  if (document.readyState !== 'loading') {
+    fn();
+  } else {
+    document.addEventListener('DOMContentLoaded', fn);
+  }
 }
 
 
@@ -29,6 +29,7 @@ export function ready(fn) {
     const editor = new FilterEditor({
       container: '#django-lispy-filter-editor',
       schema: schema,
+      mainModel: "fieldsmodel",
       initialExpression: [
         "not", ["and", ["not", ["=", "char__gt", 1]]]
       ]

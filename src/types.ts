@@ -42,6 +42,7 @@ export type LispyOperator = 'not' | 'and' | 'or';
 export interface FilterEditorOptions {
   container: HTMLElement | string;
   schema: any;
+  mainModel: string;
   initialExpression?: LispyExpression;
 }
 

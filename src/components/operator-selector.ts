@@ -24,21 +24,22 @@ export class OperatorSelect {
         select.className = 'dlf:absolute dlf:bg-white dlf:border dlf:border-gray-300 dlf:rounded dlf:shadow-lg dlf:z-50';
         
         this.options.forEach(option => {
-            const optionElement = document.createElement('div');
-            optionElement.className = `dlf-operator dlf-${option.value}-operator dlf:cursor-pointer dlf:p-2 dlf:hover:bg-gray-100`;
-            optionElement.textContent = option.display;
-            optionElement.setAttribute('data-value', option.value);
+          const optionElement = document.createElement('div');
+          optionElement.className = `dlf-operator dlf-${option.value}-operator
+          dlf:cursor-pointer dlf:p-2 dlf:hover:bg-gray-100`;
+          optionElement.textContent = option.display;
+          optionElement.setAttribute('data-value', option.value);
             
-            optionElement.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.selectOption(option);
-            });
+          optionElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.selectOption(option);
+          });
             
-            select.appendChild(optionElement);
+          select.appendChild(optionElement);
         });
 
-        // Position the select below the element
-        const rect = this.element.getBoundingClientRect();
+      // Position the select below the element
+      const rect = this.element.getBoundingClientRect();
         select.style.top = `${rect.bottom}px`;
         select.style.left = `${rect.left}px`;
         
