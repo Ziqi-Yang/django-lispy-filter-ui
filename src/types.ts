@@ -6,9 +6,10 @@ export interface SchemaField {
   choices: null | Record<string, string>;
 }
 
-export interface SchemaModel {
+export type SchemaModel = {
   __rel: string[];
-  [key: string]: SchemaField | string[];
+  __verbose_name: string;
+  [key: string]: SchemaField | string[] | string;
 }
 
 export interface SchemaModels {
@@ -104,4 +105,20 @@ export function isLispyExpression(expr: unknown): expr is LispyExpression {
   return isLispyNotExpr(expr) ||
     isLispyAndOrExpr(expr) ||
     isLispyConditionExpr(expr);
+}
+
+export function isSchemaField(obj: any): obj is SchemaField {
+  return (
+    typeof obj === 'object' &&
+      obj !== null &&
+      typeof obj.verbose_name === 'string' &&
+      typeof obj.class === 'string' &&
+      (
+        obj.choices === null ||
+          (
+            Object.prototype.toString.call(obj.choices) === '[object Object]' &&
+              Object.values(obj.choices).every(v => typeof v === 'string')
+          )
+      )
+  );
 }
