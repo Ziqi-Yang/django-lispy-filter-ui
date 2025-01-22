@@ -3,6 +3,12 @@
 @import "tailwindcss/theme" layer(theme) prefix(dlf) source("./");
 @import "tailwindcss/utilities" layer(utilities) prefix(dlf) source("./");
 
+@import 'cascaderjs/styles/index.css';
+
+.cascader-container {
+    @apply dlf:w-fit dlf:min-w-24;
+}
+
 /* dlf:tooltip */
 @utility tooltip {
     @apply dlf:relative dlf:inline-block;
@@ -22,6 +28,7 @@
 
 
 @layer components {
+    
     .dlf-root-container {}
 
     

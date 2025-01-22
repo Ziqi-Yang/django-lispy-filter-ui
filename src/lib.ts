@@ -1,4 +1,4 @@
-import './tailwind.css';
+import './main.css';
 
 import type {
   FilterEditorOptions,
@@ -8,17 +8,28 @@ import type {
   Schema
 } from './types';
 
+import type {
+  CascaderOptionsData
+} from 'cascaderjs';
+
+import Cascader from 'cascaderjs';
+
 import { isLispyConditionExpr, isLispyExpression, isLispyOperator } from './types';
 
 import { trans } from './trans';
 
 import { OperatorSelect } from './components/operator-selector';
 import { html2node } from './utils';
+import { genFieldsListFromSchema } from './schema.ts';
+
+const NON_INITIALIZED_FIELD_SELECTER_QUERY =
+      '.dlf-field-selector:not(:has(> .cascader-container))';
 
 export class FilterEditor {
   private container: HTMLElement;
   private expression: LispyExpression;
   private schema: Schema;
+  private fieldsList: CascaderOptionsData[];
 
   constructor(options: FilterEditorOptions) {
     const container = typeof options.container === 'string' 
@@ -30,18 +41,44 @@ export class FilterEditor {
     this.container = container as HTMLElement;
         
     this.expression = options.initialExpression || ['and'];
-    this.schema = options.schema
+    this.schema = options.schema;
+    this.fieldsList = genFieldsListFromSchema(options.mainModel, this.schema.models);
     this.init();
   }
 
-  private init(): void {
+  private init() {
     this.render();
     this.attachEventListeners();
 
-    console.log(this.toJson());
+    while (document.querySelector(NON_INITIALIZED_FIELD_SELECTER_QUERY)) {
+      this.setupNewCascaderSelect();
+    }
   }
 
-  private render(): void {
+  
+  /**
+   * setup a new CascaderSelect
+   */
+  private setupNewCascaderSelect() {
+    const cascader = new Cascader(NON_INITIALIZED_FIELD_SELECTER_QUERY,
+      {
+        mode: "single",
+        // don't set placeholder, see issue https://github.com/phaoer/Cascader/issues/7
+        // placeholder: trans(["fieldSelector", "placeholder"]),
+        data: this.fieldsList,
+        showClear: false,
+        onChange(value, labelValue, indexValue) {
+          // console.log(value, labelValue, indexValue);
+        },
+        displayRender(value) {
+          return value.join(" > ");
+        },
+      }
+    );
+    cascader.init();
+  }
+
+  private render() {
     this.container.innerHTML = `
     <div class="dlf-root-container">
       ${this.renderExpression(this.expression)}
@@ -145,7 +182,10 @@ export class FilterEditor {
     return `
     <div class="dlf-condition dlf:group">
       ${isNegated ? this.renderOperator('not') : ""}
-      <span>${field} ${lookups} ${value}</span>
+      <div class="dlf:flex dlf:gap-2 dlf:items-center" >
+        <div class="dlf-field-selector"></div>
+        ${lookups} ${value}
+      </div>
       
       <div class="dlf:invisible dlf:group-hover:visible gap-2">
 
@@ -172,7 +212,7 @@ export class FilterEditor {
     `;
   }
 
-  private attachEventListeners(): void {
+  private attachEventListeners() {
     this.container.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       
