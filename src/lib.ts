@@ -20,7 +20,7 @@ import { trans } from './trans';
 
 import { OperatorSelect } from './components/operator-selector';
 import { html2node } from './utils';
-import { genFieldsListFromSchema } from './schema.ts';
+import { genFieldsListFromSchema, getFieldType } from './schema.ts';
 
 const NON_INITIALIZED_FIELD_SELECTER_QUERY =
       '.dlf-field-selector:not(:has(> .cascader-container))';
@@ -29,6 +29,7 @@ export class FilterEditor {
   private container: HTMLElement;
   private expression: LispyExpression;
   private schema: Schema;
+  private mainModel: string;
   private fieldsList: CascaderOptionsData[];
 
   constructor(options: FilterEditorOptions) {
@@ -42,7 +43,8 @@ export class FilterEditor {
         
     this.expression = options.initialExpression || ['and'];
     this.schema = options.schema;
-    this.fieldsList = genFieldsListFromSchema(options.mainModel, this.schema.models);
+    this.mainModel = options.mainModel;
+    this.fieldsList = genFieldsListFromSchema(this.mainModel, this.schema.models);
     this.init();
   }
 
@@ -62,6 +64,8 @@ export class FilterEditor {
           document.querySelector(NON_INITIALIZED_FIELD_SELECTER_QUERY);
     
     if (!conditionInputContainerElem) return null;
+
+    let prevCascaderValue: string[] | undefined;
     
     const cascader = new Cascader(NON_INITIALIZED_FIELD_SELECTER_QUERY,
       {
@@ -70,9 +74,13 @@ export class FilterEditor {
         // placeholder: trans(["fieldSelector", "placeholder"]),
         data: this.fieldsList,
         showClear: false,
-        onChange: (value, labelValue, indexValue) {
-          // console.log(value, labelValue, indexValue);
-          // this.setupClassSelector(conditionInputContainerElem);
+        onChange: (value, _labelValue, _indexValue) => {
+          // NOTE this function is called every time user clicks
+          if (value.length && prevCascaderValue != value) {
+            const fieldType = getFieldType(value, this.mainModel, this.schema.models);
+            this.setupClassSelector(conditionInputContainerElem.parentElement as HTMLElement, fieldType);
+          }
+          prevCascaderValue = value;
         },
         displayRender(value) {
           return value.join(" > ");
@@ -94,7 +102,7 @@ export class FilterEditor {
           conditionInputContainerElem.querySelector(".dlf-class-selector")!;
     const valueInputElem = conditionInputContainerElem.querySelector(".dlf-value-input")!;
 
-    const newClassSelector = document.createElement("selector");
+    const newClassSelector = document.createElement("select");
     lookups.forEach(lookup => {
       const optionElem = document.createElement("option");
       optionElem.value = lookup;
@@ -208,17 +216,13 @@ export class FilterEditor {
     condition: LispyConditionExpr,
     isNegated: boolean = false
   ): string {
-    const [field, ...lookups] = condition[1].split("__");
-    const value = condition[2];
-    
-    
     return `
     <div class="dlf-condition dlf:group">
       ${isNegated ? this.renderOperator('not') : ""}
       <div class="dlf-condition-input-container dlf:flex dlf:gap-2 dlf:items-center" >
         <div class="dlf-field-selector"></div>
-        <div class="dlf-class-selector">${lookups}</div>
-        <div class="dlf-value-input">${value}</div>
+        <div class="dlf-class-selector"></div>
+        <div class="dlf-value-input"></div>
       </div>
       
       <div class="dlf:invisible dlf:group-hover:visible gap-2">
