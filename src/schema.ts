@@ -1,4 +1,4 @@
-import { isSchemaField, type Schema } from './types';
+import { isSchemaField, type Schema, type SchemaField } from './types';
 import type { CascaderOptionsData } from 'cascaderjs';
 
 
@@ -48,11 +48,11 @@ export function genFieldsListFromSchema(
   return res;
 }
 
-export function getFieldType(
+export function getField(
   fieldNames: string[],
   mainModel: string,
   modelsSchema: Schema['models']
-): string {
+): SchemaField {
   if (fieldNames.length === 0) {
     throw new Error("fieldNames array must not be empty");
   }
@@ -75,7 +75,7 @@ export function getFieldType(
       if (!isSchemaField(field)) {
         throw new Error(`Wrong schema! '${fieldName}' should be a SchemaField`);
       }
-      return field.class;
+      return field;
     }
   }
 

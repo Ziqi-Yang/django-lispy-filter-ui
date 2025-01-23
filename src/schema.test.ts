@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { genFieldsListFromSchema, getFieldType } from "./schema";
+import { genFieldsListFromSchema, getField } from "./schema";
 import type { Schema } from "./types";
 
 const SchemaOnlyModels = {
@@ -179,9 +179,9 @@ test("genFieldsListFromSchema", () => {
 
 
 test("getFieldType", () => {
-  let res = getFieldType(["id"], "fieldsmodel", SchemaOnlyModels.models);
-  expect(res).toEqual("BigAutoField");
+  let res = getField(["id"], "fieldsmodel", SchemaOnlyModels.models);
+  expect(res.class).toEqual("BigAutoField");
 
-  res = getFieldType(["user", "last_login"], "fieldsmodel", SchemaOnlyModels.models);
-  expect(res).toEqual("DateTimeField");
+  res = getField(["user", "last_login"], "fieldsmodel", SchemaOnlyModels.models);
+  expect(res.class).toEqual("DateTimeField");
 })

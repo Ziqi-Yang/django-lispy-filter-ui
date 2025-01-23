@@ -5,7 +5,8 @@ import type {
   LispyExpression,
   LispyConditionExpr,
   LispyOperator,
-  Schema
+  Schema,
+  SchemaField
 } from './types';
 
 import type {
@@ -20,7 +21,7 @@ import { trans } from './trans';
 
 import { OperatorSelect } from './components/operator-selector';
 import { html2node } from './utils';
-import { genFieldsListFromSchema, getFieldType } from './schema.ts';
+import { genFieldsListFromSchema, getField } from './schema.ts';
 
 const NON_INITIALIZED_FIELD_SELECTER_QUERY =
       '.dlf-field-selector:not(:has(> .cascader-container))';
@@ -77,8 +78,8 @@ export class FilterEditor {
         onChange: (value, _labelValue, _indexValue) => {
           // NOTE this function is called every time user clicks
           if (value.length && prevCascaderValue != value) {
-            const fieldType = getFieldType(value, this.mainModel, this.schema.models);
-            this.setupClassSelector(conditionInputContainerElem.parentElement as HTMLElement, fieldType);
+            const field = getField(value, this.mainModel, this.schema.models);
+            this.setupClassSelector(conditionInputContainerElem.parentElement as HTMLElement, field);
           }
           prevCascaderValue = value;
         },
@@ -94,29 +95,101 @@ export class FilterEditor {
 
   private setupClassSelector(
     conditionInputContainerElem: HTMLElement,
-    fieldType: string,
+    field: SchemaField,
   ) {
-    const lookups = this.schema.lookups[fieldType];
+    const lookups = this.schema.lookups[field.class];
     
-    const classSelectorEelm =
+    const classSelectorDivEelm =
           conditionInputContainerElem.querySelector(".dlf-class-selector")!;
-    const valueInputElem = conditionInputContainerElem.querySelector(".dlf-value-input")!;
+    const valueInputDivElem = conditionInputContainerElem.querySelector(".dlf-value-input")!;
 
-    const newClassSelector = document.createElement("select");
+    const newClassSelectorElem: HTMLSelectElement = document.createElement("select");
+    newClassSelectorElem.className = 'dlf-select';
     lookups.forEach(lookup => {
       const optionElem = document.createElement("option");
       optionElem.value = lookup;
       optionElem.label = trans(["lookup", lookup])
-      newClassSelector.append(optionElem)
+      newClassSelectorElem.append(optionElem)
     });
     
-    classSelectorEelm.replaceChildren(newClassSelector);
-    valueInputElem.replaceChildren(); // empty valueInputElem
+    classSelectorDivEelm.replaceChildren(newClassSelectorElem);
     
-    newClassSelector.addEventListener("change", () => {
-      console.log("El Psy Congroo");
+    // TODO put new element
+    valueInputDivElem.replaceChildren();
+    this.setupValueInput(conditionInputContainerElem, field, newClassSelectorElem.value);
+    
+    newClassSelectorElem.addEventListener("change", () => {
+     this.setupValueInput(conditionInputContainerElem, field, newClassSelectorElem.value);
     })
+  }
 
+  private setupValueInput(
+    conditionInputContainerElem: HTMLElement,
+    field: SchemaField,
+    lookup: string,
+  ) {
+    const valueInputDivElem = conditionInputContainerElem.querySelector(".dlf-value-input")!;
+    if (field.choices) {
+      const selectElem = document.createElement("select");
+      selectElem.className = 'dlf-select';
+      for (const [key, value] of Object.entries(field.choices)) {
+        const optionElem = document.createElement("option");
+        optionElem.value = key;
+        optionElem.label = value;
+        selectElem.append(optionElem);
+        return;
+      }
+    }
+    
+    const valueInputElem = document.createElement("input");
+    valueInputElem.className = 'dlf-input';
+    const field_class = field.class;
+    
+    let input_type = "";
+    switch (field_class) {
+      case "AutoField":
+      case "BigAutoField":
+      case "BigIntegerField":
+      case "SmallAutoField":
+      case "SmallIntegerField":
+      case "DecimalField":
+      case "DurationField":
+      case "FloatField":
+      case "IntegerField":
+      case "PositiveBigIntegerField":
+      case "PositiveIntegerField":
+      case "PositiveSmallIntegerField":
+      case "URLField":
+      case "UUIDField":
+        input_type = "number";
+        break;
+      case "BooleanField":
+        input_type = "checkbox";
+        break;
+      case "CharField":
+      case "EmailField":
+      case "EmailField":
+      case "FileField":
+      case "FilePathField":
+      case "GenericIPAddressField":
+      case "ImageField":
+      case "SlugField":
+      case "TextField":
+        input_type = "text";
+        break;
+      case "DateField":
+      case "DateTimeField":
+      case "TimeField":
+        input_type = "datetime-local";
+        break;
+    }
+
+    if (lookup == "isnull") {
+      input_type = "checkbox";
+    }
+    
+    valueInputElem.type = input_type;
+    valueInputDivElem.replaceChildren(valueInputElem);
   }
 
   private render() {
