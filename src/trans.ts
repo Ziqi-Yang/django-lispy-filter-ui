@@ -20,6 +20,23 @@ export const i18n = new I18n({
     "toggle-not": "Toggle not operator",
     "fieldSelector": {
       "placeholder": "Select a field"
+    },
+    "lookup": {
+      "exact": "equals",
+      "iexact": "equals (case-insensitive)",
+      "isnull": "is null",
+      "gt": "is greater than",
+      "gte": "is greater than or equal to",
+      "lt": "is less than",
+      "lte": "is less than or equal to",
+      "contains": "contains",
+      "icontains": "contains(case-insensitive)",
+      "startswith": "starts with",
+      "istartswith": "starts with(case-insensitive)",
+      "endswith": "ends with",
+      "iendswith": "ends with(case-insensitive)",
+      "regex": "matches(regular expression)",
+      "iregex": "matches(regular expression, case-insensitive)",
     }
   },
   "zh": { // for all zh (zh-CN, etc.)

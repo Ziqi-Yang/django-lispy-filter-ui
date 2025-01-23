@@ -47,3 +47,37 @@ export function genFieldsListFromSchema(
   
   return res;
 }
+
+export function getFieldType(
+  fieldNames: string[],
+  mainModel: string,
+  modelsSchema: Schema['models']
+): string {
+  if (fieldNames.length === 0) {
+    throw new Error("fieldNames array must not be empty");
+  }
+
+  let curModel = modelsSchema[mainModel];
+
+  for (let index = 0; index < fieldNames.length; index++) {
+    const fieldName = fieldNames[index];
+    if (index !== fieldNames.length - 1) {
+      if (curModel[fieldName]) {
+        throw new Error(`Field '${fieldName}' should not be a SchemaField in model`);
+      }
+      const nextModel = modelsSchema[fieldName];
+      if (!nextModel) {
+        throw new Error(`Model '${fieldName}' not found in schema`);
+      }
+      curModel = nextModel;
+    } else {
+      const field = curModel[fieldName];
+      if (!isSchemaField(field)) {
+        throw new Error(`Wrong schema! '${fieldName}' should be a SchemaField`);
+      }
+      return field.class;
+    }
+  }
+
+  throw new Error("Unexpected end of function execution");
+}

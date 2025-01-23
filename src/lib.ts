@@ -50,16 +50,19 @@ export class FilterEditor {
     this.render();
     this.attachEventListeners();
 
-    while (document.querySelector(NON_INITIALIZED_FIELD_SELECTER_QUERY)) {
-      this.setupNewCascaderSelect();
-    }
+    while (!this.setupNewCascaderSelect()) {}
   }
 
   
   /**
    * setup a new CascaderSelect
    */
-  private setupNewCascaderSelect() {
+  private setupNewCascaderSelect(): Cascader | null {
+    const conditionInputContainerElem =
+          document.querySelector(NON_INITIALIZED_FIELD_SELECTER_QUERY);
+    
+    if (!conditionInputContainerElem) return null;
+    
     const cascader = new Cascader(NON_INITIALIZED_FIELD_SELECTER_QUERY,
       {
         mode: "single",
@@ -67,8 +70,9 @@ export class FilterEditor {
         // placeholder: trans(["fieldSelector", "placeholder"]),
         data: this.fieldsList,
         showClear: false,
-        onChange(value, labelValue, indexValue) {
+        onChange: (value, labelValue, indexValue) {
           // console.log(value, labelValue, indexValue);
+          // this.setupClassSelector(conditionInputContainerElem);
         },
         displayRender(value) {
           return value.join(" > ");
@@ -76,6 +80,35 @@ export class FilterEditor {
       }
     );
     cascader.init();
+    
+    return cascader;
+  }
+
+  private setupClassSelector(
+    conditionInputContainerElem: HTMLElement,
+    fieldType: string,
+  ) {
+    const lookups = this.schema.lookups[fieldType];
+    
+    const classSelectorEelm =
+          conditionInputContainerElem.querySelector(".dlf-class-selector")!;
+    const valueInputElem = conditionInputContainerElem.querySelector(".dlf-value-input")!;
+
+    const newClassSelector = document.createElement("selector");
+    lookups.forEach(lookup => {
+      const optionElem = document.createElement("option");
+      optionElem.value = lookup;
+      optionElem.label = trans(["lookup", lookup])
+      newClassSelector.append(optionElem)
+    });
+    
+    classSelectorEelm.replaceChildren(newClassSelector);
+    valueInputElem.replaceChildren(); // empty valueInputElem
+    
+    newClassSelector.addEventListener("change", () => {
+      console.log("El Psy Congroo");
+    })
+
   }
 
   private render() {
@@ -182,9 +215,10 @@ export class FilterEditor {
     return `
     <div class="dlf-condition dlf:group">
       ${isNegated ? this.renderOperator('not') : ""}
-      <div class="dlf:flex dlf:gap-2 dlf:items-center" >
+      <div class="dlf-condition-input-container dlf:flex dlf:gap-2 dlf:items-center" >
         <div class="dlf-field-selector"></div>
-        ${lookups} ${value}
+        <div class="dlf-class-selector">${lookups}</div>
+        <div class="dlf-value-input">${value}</div>
       </div>
       
       <div class="dlf:invisible dlf:group-hover:visible gap-2">
