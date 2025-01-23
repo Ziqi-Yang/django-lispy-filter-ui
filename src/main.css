@@ -119,4 +119,24 @@
         @apply dlf:truncate;
         @apply dlf:w-48;
     }
+
+    
+
+    .dlf-popup-menu {
+        @apply dlf:absolute dlf:left-8 dlf:top-[10px];
+        @apply dlf:w-fit;
+        @apply dlf:rounded-r-md dlf:rounded-bl-md dlf:shadow-md dlf:bg-white;
+        @apply dlf:z-50;
+        
+        > ul {
+            @apply dlf:space-y-1;
+            
+            > li > a {
+                @apply dlf:block dlf:px-4 dlf:py-2 ;
+                @apply dlf:text-sm dlf:font-medium dlf:text-gray-500;
+                @apply dlf:hover:bg-gray-100 dlf:hover:text-gray-700;
+                @apply dlf:cursor-pointer;
+            }
+        }
+    }
 }

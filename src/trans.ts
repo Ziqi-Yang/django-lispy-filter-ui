@@ -16,7 +16,6 @@ export const i18n = new I18n({
       "xor": "Xor",
     },
     "delete-condition": "Delete this condition",
-    "add-new-condition": "Add a new condition",
     "toggle-not": "Toggle not operator",
     "fieldSelector": {
       "placeholder": "Select a field"
@@ -37,7 +36,11 @@ export const i18n = new I18n({
       "iendswith": "ends with(case-insensitive)",
       "regex": "matches(regular expression)",
       "iregex": "matches(regular expression, case-insensitive)",
-    }
+    },
+    "add-new": "Add a new group or condition",
+    "add-new-and-group": "Add a new `And` group",
+    "add-new-or-group": "Add a new `Or` group",
+    "add-new-condition": "Add a new condition"
   },
   "zh": { // for all zh (zh-CN, etc.)
     ...zhCN

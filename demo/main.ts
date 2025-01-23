@@ -31,7 +31,7 @@ export function ready(fn) {
       schema: schema,
       mainModel: "fieldsmodel",
       initialExpression: [
-        "not", ["and", ["not", ["=", "char__gt", 1]]]
+        "not", ["and", ["not", ["=", "user__password__gt", 1]]]
       ]
     });
   });

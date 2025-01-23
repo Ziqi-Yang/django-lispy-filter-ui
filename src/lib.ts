@@ -20,11 +20,11 @@ import { isLispyConditionExpr, isLispyExpression, isLispyOperator } from './type
 import { trans } from './trans';
 
 import { OperatorSelect } from './components/operator-selector';
-import { html2node } from './utils';
 import { genFieldsListFromSchema, getField } from './schema.ts';
 
 const NON_INITIALIZED_FIELD_SELECTER_QUERY =
       '.dlf-field-selector:not(:has(> .cascader-container))';
+const CASCADER_SPLIT_STR = " > ";
 
 export class FilterEditor {
   private container: HTMLElement;
@@ -51,7 +51,7 @@ export class FilterEditor {
 
   private init() {
     this.render();
-    this.attachEventListeners();
+    this.setupEventListener();
 
     while (!this.setupNewCascaderSelect()) {}
   }
@@ -66,15 +66,20 @@ export class FilterEditor {
     
     if (!conditionInputContainerElem) return null;
 
+    const rawInitialValue = conditionInputContainerElem.getAttribute("data-initial-value");
+    let initialValue: string[] | undefined;
+    if (rawInitialValue) {
+      initialValue = rawInitialValue.split(",");
+    }
     let prevCascaderValue: string[] | undefined;
     
     const cascader = new Cascader(NON_INITIALIZED_FIELD_SELECTER_QUERY,
       {
         mode: "single",
-        // don't set placeholder, see issue https://github.com/phaoer/Cascader/issues/7
-        // placeholder: trans(["fieldSelector", "placeholder"]),
+        placeholder: trans(["fieldSelector", "placeholder"]),
         data: this.fieldsList,
         showClear: false,
+        defaultValue: initialValue,
         onChange: (value, _labelValue, _indexValue) => {
           // NOTE this function is called every time user clicks
           if (value.length && prevCascaderValue != value) {
@@ -84,11 +89,17 @@ export class FilterEditor {
           prevCascaderValue = value;
         },
         displayRender(value) {
-          return value.join(" > ");
+          return value.join(CASCADER_SPLIT_STR);
         },
       }
     );
     cascader.init();
+
+    if (initialValue) {
+      const field = getField(initialValue, this.mainModel, this.schema.models);
+      this.setupClassSelector(conditionInputContainerElem.parentElement as HTMLElement, field);
+      conditionInputContainerElem.removeAttribute("data-initial-value");
+    }
     
     return cascader;
   }
@@ -99,7 +110,7 @@ export class FilterEditor {
   ) {
     const lookups = this.schema.lookups[field.class];
     
-    const classSelectorDivEelm =
+    const classSelectorDivElem =
           conditionInputContainerElem.querySelector(".dlf-class-selector")!;
     const valueInputDivElem = conditionInputContainerElem.querySelector(".dlf-value-input")!;
 
@@ -111,15 +122,23 @@ export class FilterEditor {
       optionElem.label = trans(["lookup", lookup])
       newClassSelectorElem.append(optionElem)
     });
+    const initial_value = classSelectorDivElem.getAttribute("data-initial-value");
+    if (initial_value) {
+      if (lookups.includes(initial_value)) {
+        newClassSelectorElem.value = initial_value;
+      } else {
+        console.error(`The initial_value ${initial_value} is not in lookups! Element:`, classSelectorDivElem);
+      }
+      classSelectorDivElem.removeAttribute("data-initial-value");
+    }
     
-    classSelectorDivEelm.replaceChildren(newClassSelectorElem);
+    classSelectorDivElem.replaceChildren(newClassSelectorElem);
     
-    // TODO put new element
     valueInputDivElem.replaceChildren();
     this.setupValueInput(conditionInputContainerElem, field, newClassSelectorElem.value);
     
     newClassSelectorElem.addEventListener("change", () => {
-     this.setupValueInput(conditionInputContainerElem, field, newClassSelectorElem.value);
+      this.setupValueInput(conditionInputContainerElem, field, newClassSelectorElem.value);
     })
   }
 
@@ -129,6 +148,8 @@ export class FilterEditor {
     lookup: string,
   ) {
     const valueInputDivElem = conditionInputContainerElem.querySelector(".dlf-value-input")!;
+    const initialValue = valueInputDivElem.getAttribute("data-initial-value");
+    
     if (field.choices) {
       const selectElem = document.createElement("select");
       selectElem.className = 'dlf-select';
@@ -137,12 +158,26 @@ export class FilterEditor {
         optionElem.value = key;
         optionElem.label = value;
         selectElem.append(optionElem);
+
+        if (initialValue) {
+          if (initialValue in field.choices) {
+            selectElem.value = initialValue;
+          }
+          valueInputDivElem.removeAttribute("data-initial-value");
+        }
+
         return;
       }
+
+      
     }
     
     const valueInputElem = document.createElement("input");
     valueInputElem.className = 'dlf-input';
+    if (initialValue) {
+      valueInputElem.value = initialValue;
+      valueInputDivElem.removeAttribute("data-initial-value");
+    }
     const field_class = field.class;
     
     let input_type = "";
@@ -167,7 +202,6 @@ export class FilterEditor {
         input_type = "checkbox";
         break;
       case "CharField":
-      case "EmailField":
       case "EmailField":
       case "FileField":
       case "FilePathField":
@@ -258,9 +292,9 @@ export class FilterEditor {
         
       <div class="dlf-indent">
         ${children}
-        <div>
-          <div class="dlf:tooltip" data-tip="${trans('add-new-condition')}" >
-            <button class="dlf-icon-button" data-action="add-condition">
+        <div class="dlf:relative">
+          <div class="dlf:tooltip" data-tip="${trans('add-new')}" >
+            <button class="dlf-icon-button" data-action="add-new">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
                 class="dlf:size-4">
@@ -286,17 +320,42 @@ export class FilterEditor {
   }
 
   private renderCondition(
-    condition: LispyConditionExpr,
+    condition?: LispyConditionExpr,
     isNegated: boolean = false
   ): string {
+    let conditionInputContainerElem: string | undefined;
+    
+    if (condition) {
+      const fields_lookup = condition[1].split("__");
+      const fields = fields_lookup.slice(0, -1);
+      const lookup = fields_lookup.slice(-1)[0];
+      const value = condition[2];
+      if (typeof value === 'object')  {
+        // NOTE currently doesn't support custom function type
+        throw new Error(`Currently doesn't support ${value} in LispyConditionExpr`);
+      }
+
+      conditionInputContainerElem = `
+<div class="dlf-condition-input-container dlf:flex dlf:gap-2 dlf:items-center" >
+  <div class="dlf-field-selector" data-initial-value="${fields}"></div>
+  <div class="dlf-class-selector" data-initial-value="${lookup}"></div>
+  <div class="dlf-value-input" data-initial-value="${value}"></div>
+</div>
+`;
+    } else {
+      conditionInputContainerElem = `
+<div class="dlf-condition-input-container dlf:flex dlf:gap-2 dlf:items-center" >
+  <div class="dlf-field-selector"></div>
+  <div class="dlf-class-selector"></div>
+  <div class="dlf-value-input"></div>
+</div>
+`;
+    }
+    
     return `
     <div class="dlf-condition dlf:group">
       ${isNegated ? this.renderOperator('not') : ""}
-      <div class="dlf-condition-input-container dlf:flex dlf:gap-2 dlf:items-center" >
-        <div class="dlf-field-selector"></div>
-        <div class="dlf-class-selector"></div>
-        <div class="dlf-value-input"></div>
-      </div>
+      ${conditionInputContainerElem}
       
       <div class="dlf:invisible dlf:group-hover:visible gap-2">
 
@@ -323,7 +382,7 @@ export class FilterEditor {
     `;
   }
 
-  private attachEventListeners() {
+  private setupEventListener() {
     this.container.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       
@@ -340,8 +399,8 @@ export class FilterEditor {
         const action = btnElem.dataset.action;
 
         switch (action) {
-          case 'add-condition':
-            console.log('add');
+          case 'add-new':
+            this.addNew(btnElem);
             break;
           case 'delete-condition':
             console.log('delete');
@@ -360,6 +419,74 @@ export class FilterEditor {
     });
   }
 
+  private addNew(addNewBtnElem: HTMLElement) {
+    const actionContainerElem = addNewBtnElem!.parentElement!.parentElement!;
+    if (actionContainerElem.querySelector(".dlf-popup-menu")) return;
+    
+    const popupMenuElem = document.createElement("div");
+    popupMenuElem.className = "dlf-popup-menu";
+    popupMenuElem.innerHTML = `
+<ul>
+  <li><a data-action="add-new-and-group">${trans("add-new-and-group")}</a></li>
+  <li><a data-action="add-new-or-group">${trans("add-new-or-group")}</a></li>
+  <li><a data-action="add-new-condition">${trans("add-new-condition")}</a></li>
+</ul>
+`;
+
+    const controller = new AbortController();
+
+    const handleDocumentClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+  
+      if (!popupMenuElem.isConnected) return;
+
+      const isClickInside = popupMenuElem.contains(target);
+      const isAddButtonClick = addNewBtnElem.contains(target);
+
+      if (!isClickInside && !isAddButtonClick) {
+        popupMenuElem.remove();
+        controller.abort();
+      }
+    };
+
+    document.addEventListener('click', handleDocumentClick, { 
+      signal: controller.signal 
+    });
+
+    
+    popupMenuElem.querySelectorAll('a').forEach(menuItem => {
+      menuItem.addEventListener('click', () => {
+        const action = menuItem.getAttribute("data-action")!;
+        switch (action) {
+          case 'add-new-and-group':
+            this.addNewGroup('and', actionContainerElem);
+            break;
+          case 'add-new-or-group':
+            this.addNewGroup('or', actionContainerElem);
+            break;
+          case 'add-new-condition':
+            break;
+        }
+        
+        popupMenuElem.remove();
+        controller.abort();
+      }, { signal: controller.signal });
+    });
+
+    
+    addNewBtnElem.parentElement!.insertAdjacentElement('afterend', popupMenuElem);
+  }
+
+  private addNewGroup(groupType: "and" | "or", actionContainerElem: HTMLElement) {
+    const newGroupExpression: [typeof groupType] = [groupType];
+    const newGroupRawHTML = this.renderExpression(newGroupExpression);
+    actionContainerElem.insertAdjacentHTML('beforebegin', newGroupRawHTML);
+  }
+
+  private addNewCondition(actionContainerElem: HTMLElement) {
+    // actionContainerElem()
+  }
+
   private toggleNot(btnElem: HTMLElement) {
     const closestConditionElem = btnElem.closest(".dlf-condition");
     let parentElem = null;
@@ -376,7 +503,7 @@ export class FilterEditor {
     if (notOpElem) {
       notOpElem.remove();
     } else {
-      parentElem.insertBefore(html2node(this.renderOperator("not")), parentElem.firstChild);
+      parentElem.insertAdjacentHTML('afterbegin', this.renderOperator("not"));
     }
   }
 
