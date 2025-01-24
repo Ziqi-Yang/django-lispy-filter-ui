@@ -4,3 +4,10 @@
 main {
     @apply p-3;
 }
+
+@layer components {
+    .btn {
+        @apply border hover:bg-gray-200 cursor-pointer;
+    }
+}
+

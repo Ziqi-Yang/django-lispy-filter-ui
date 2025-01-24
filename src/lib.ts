@@ -84,7 +84,7 @@ export class FilterEditor {
           // NOTE this function is called every time user clicks
           if (value.length && prevCascaderValue != value) {
             const field = getField(value, this.mainModel, this.schema.models);
-            this.setupClassSelector(conditionInputContainerElem.parentElement as HTMLElement, field);
+            this.setupLookupSelector(conditionInputContainerElem.parentElement as HTMLElement, field);
           }
           prevCascaderValue = value;
         },
@@ -97,48 +97,48 @@ export class FilterEditor {
 
     if (initialValue) {
       const field = getField(initialValue, this.mainModel, this.schema.models);
-      this.setupClassSelector(conditionInputContainerElem.parentElement as HTMLElement, field);
+      this.setupLookupSelector(conditionInputContainerElem.parentElement as HTMLElement, field);
       conditionInputContainerElem.removeAttribute("data-initial-value");
     }
     
     return cascader;
   }
 
-  private setupClassSelector(
+  private setupLookupSelector(
     conditionInputContainerElem: HTMLElement,
     field: SchemaField,
   ) {
     const lookups = this.schema.lookups[field.class];
     
-    const classSelectorDivElem =
-          conditionInputContainerElem.querySelector(".dlf-class-selector")!;
+    const lookupSelectorElem =
+          conditionInputContainerElem.querySelector(".dlf-lookup-selector")!;
     const valueInputDivElem = conditionInputContainerElem.querySelector(".dlf-value-input")!;
 
-    const newClassSelectorElem: HTMLSelectElement = document.createElement("select");
-    newClassSelectorElem.className = 'dlf-select';
+    const newLookupSelectorElem: HTMLSelectElement = document.createElement("select");
+    newLookupSelectorElem.className = 'dlf-select';
     lookups.forEach(lookup => {
       const optionElem = document.createElement("option");
       optionElem.value = lookup;
       optionElem.label = trans(["lookup", lookup])
-      newClassSelectorElem.append(optionElem)
+      newLookupSelectorElem.append(optionElem)
     });
-    const initial_value = classSelectorDivElem.getAttribute("data-initial-value");
+    const initial_value = lookupSelectorElem.getAttribute("data-initial-value");
     if (initial_value) {
       if (lookups.includes(initial_value)) {
-        newClassSelectorElem.value = initial_value;
+        newLookupSelectorElem.value = initial_value;
       } else {
-        console.error(`The initial_value ${initial_value} is not in lookups! Element:`, classSelectorDivElem);
+        console.error(`The initial_value ${initial_value} is not in lookups! Element:`, lookupSelectorElem);
       }
-      classSelectorDivElem.removeAttribute("data-initial-value");
+      lookupSelectorElem.removeAttribute("data-initial-value");
     }
     
-    classSelectorDivElem.replaceChildren(newClassSelectorElem);
+    lookupSelectorElem.replaceChildren(newLookupSelectorElem);
     
     valueInputDivElem.replaceChildren();
-    this.setupValueInput(conditionInputContainerElem, field, newClassSelectorElem.value);
+    this.setupValueInput(conditionInputContainerElem, field, newLookupSelectorElem.value);
     
-    newClassSelectorElem.addEventListener("change", () => {
-      this.setupValueInput(conditionInputContainerElem, field, newClassSelectorElem.value);
+    newLookupSelectorElem.addEventListener("change", () => {
+      this.setupValueInput(conditionInputContainerElem, field, newLookupSelectorElem.value);
     })
   }
 
@@ -212,9 +212,13 @@ export class FilterEditor {
         input_type = "text";
         break;
       case "DateField":
+        input_type = "date";
+        break;
       case "DateTimeField":
-      case "TimeField":
         input_type = "datetime-local";
+        break;
+      case "TimeField":
+        input_type = "time";
         break;
     }
 
@@ -335,7 +339,7 @@ export class FilterEditor {
       conditionInputContainerElem = `
 <div class="dlf-condition-input-container dlf:flex dlf:gap-2 dlf:items-center" >
   <div class="dlf-field-selector" data-initial-value="${fields}"></div>
-  <div class="dlf-class-selector" data-initial-value="${lookup}"></div>
+  <div class="dlf-lookup-selector" data-initial-value="${lookup}"></div>
   <div class="dlf-value-input" data-initial-value="${value}"></div>
 </div>
 `;
@@ -343,7 +347,7 @@ export class FilterEditor {
       conditionInputContainerElem = `
 <div class="dlf-condition-input-container dlf:flex dlf:gap-2 dlf:items-center" >
   <div class="dlf-field-selector"></div>
-  <div class="dlf-class-selector"></div>
+  <div class="dlf-lookup-selector"></div>
   <div class="dlf-value-input"></div>
 </div>
 `;
@@ -504,70 +508,106 @@ export class FilterEditor {
     }
   }
 
+
+
+  
+
   public toJson(): LispyExpression {
-    const rootGroup = this.container.querySelector('.dlf-group');
+    const rootGroup = this.container.querySelector('.dlf-group') as HTMLElement;
     if (!rootGroup) {
       return ['and']; // Default empty expression
     }
     return this.parseGroup(rootGroup);
   }
 
-  private parseGroup(groupElement: Element): LispyExpression {
-    const operators = Array.from(
-      groupElement.querySelectorAll('.dlf-group-prefix .dlf-operator')
-    ).map(op => op.classList.toString());
-
-    // Check if this group is negated
-    const isNegated = operators.some(cls => cls.includes('dlf-not-operator'));
+  private parseGroup(groupElem: HTMLElement): LispyExpression {
+    const operatorElems = groupElem.firstElementChild!.querySelectorAll('.dlf-operator');
+    let isNegated = false;
+    let operator: 'and' | 'or' = 'and';
     
-    // Get the main operator (and/or/xor)
-    const mainOperator = operators.find(cls => 
-      ['dlf-and-operator', 'dlf-or-operator', 'dlf-xor-operator'].some(op => cls.includes(op))
-    );
-    
-    const operator = mainOperator
-      ?.match(/dlf-(and|or|xor)-operator/)?.[1] || 'and';
+    operatorElems.forEach(operatorElem => {
+      const value = operatorElem.getAttribute("data-value")!;
+      switch (value) {
+        case 'not':
+          isNegated = true;
+          break;
+        case 'and':
+        case 'or':
+          operator = value;
+          break;
+      }
+    });
 
     // Parse all conditions and nested groups
-    const indent = groupElement.querySelector('.dlf-indent');
-    if (!indent) {
-      // @ts-ignore
-      return [operator]; 
-    }
+    const groupBodyElem = groupElem.querySelector('.dlf-group-body')!;
 
-    const children = Array.from(indent.children)
+    const children = Array.from(groupBodyElem.children)
       .filter(child => 
         child.classList.contains('dlf-condition') || 
         child.classList.contains('dlf-group')
       )
       .map(child => {
+        console.log(child);
         if (child.classList.contains('dlf-condition')) {
-          return this.parseCondition(child);
+          return this.parseCondition(child as HTMLElement);
         } else {
-          return this.parseGroup(child);
+          return this.parseGroup(child as HTMLElement);
         }
       });
 
-    // @ts-ignore
     const expression: LispyExpression = [operator, ...children];
     
     // Wrap in NOT if negated
     return isNegated ? ['not', expression] : expression;
   }
 
-  private parseCondition(conditionElement: Element): LispyExpression {
-    const isNegated = conditionElement
+  
+  private parseCondition(conditionElement: HTMLElement): LispyExpression {
+    const isNegated = conditionElement.querySelector(".dlf-not-operator") ? true : false;
 
+    const inputContainerElem =
+          conditionElement.querySelector(".dlf-condition-input-container")!;
+    const fieldSelectorDivElem = inputContainerElem.firstElementChild!;
+    const lookupSelectorDivElem = inputContainerElem.children[1]!;
+    const valueInputDivElem = inputContainerElem.lastElementChild!;
 
+    const rawField =
+          fieldSelectorDivElem.querySelector(".cascader-container_value")!.textContent;
+    if (!rawField) {
+      throw new Error("Field selector has empty value!");
+    }
+    const fieldStr = rawField.replace(CASCADER_SPLIT_STR, "__");
 
-    // For demo, just extract the text content
-    // In real implementation, you'll want to parse the actual field and value
-    const text = conditionElement.textContent?.trim() || '';
-    const parts = text.split(' ').filter(Boolean);
+    const lookupSelectorElem = lookupSelectorDivElem.firstElementChild as HTMLSelectElement;
+    if (!lookupSelectorElem) {
+      throw new Error("Misses lookupSelectorElem!");
+    }
+    const lookupStr = lookupSelectorElem.value;
+
+    const valueInputElem = valueInputDivElem.firstElementChild as HTMLInputElement;
+    if (!valueInputElem) {
+      throw new Error("Misses valueInputElem!");
+    }
     
-    // Create a basic condition expression
-    // This is a simplified version - you'll need to adjust based on your actual condition format
-    const condition: LispyConditionExpr = ['=', parts[0], parts[parts.length - 1]];
+    const valueType = valueInputElem.type;
+    let value: string | number | boolean = valueInputElem.value;
+
+    // post-process value 
+    switch (valueType) {
+      case 'datetime-local':
+        value = new Date(value).toISOString();
+        break;
+      case 'number':
+        value = Number(value);
+        break;
+      case 'checkbox':
+        value = value == 'on' ? true : false;
+        break;
+    }
+    
+    const condition: LispyConditionExpr = [
+      '=', `${fieldStr}__${lookupStr}`, value
+    ];
     
     return isNegated ? ['not', condition] : condition;
   }

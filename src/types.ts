@@ -53,7 +53,7 @@ export interface FilterEditorOptions {
 //                           AI-written type-check functions
 //
 export function isLispyOperator(value: unknown): value is LispyOperator {
-  return typeof value === 'string' && ['not', 'xor', 'and', 'or'].includes(value);
+  return typeof value === 'string' && ['not', 'and', 'or'].includes(value);
 }
 
 export function isLispyConditionExpr(expr: unknown): expr is LispyConditionExpr {

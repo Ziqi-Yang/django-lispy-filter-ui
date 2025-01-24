@@ -31,8 +31,14 @@ export function ready(fn) {
       schema: schema,
       mainModel: "fieldsmodel",
       initialExpression: [
-        "not", ["and", ["not", ["=", "user__password__gt", 1]]]
+        "not", ["and", ["not", ["=", "user__password__exact", 1]]]
       ]
     });
+
+    // TODO add `export` button
+    document.querySelector("#btn-to-json")?.addEventListener('click', () => {
+      console.log(editor.toJson());
+    })
+    
   });
 })();
