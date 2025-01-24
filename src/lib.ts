@@ -280,12 +280,7 @@ export class FilterEditor {
         </div>          
         <div>
           <div class="dlf:tooltip" data-tip="${trans('toggle-not')}" >
-            <button class="dlf-icon-button" data-action="toggle-not">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                  stroke-width="1.5" stroke="currentColor" class="dlf:size-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-                </svg>
-            </button>
+            <button class="dlf-icon-button" data-action="toggle-not">N</button>
           </div>
         </div>
       </div>
@@ -357,7 +352,7 @@ export class FilterEditor {
       ${isNegated ? this.renderOperator('not') : ""}
       ${conditionInputContainerElem}
       
-      <div class="dlf:invisible dlf:group-hover:visible gap-2">
+      <div class="dlf:invisible dlf:group-hover:visible dlf:gap-2 dlf:flex dlf:items-center">
 
         <div class="dlf:tooltip" data-tip="${trans('delete-condition')}">
           <button class="dlf-icon-button" data-action="delete-condition">
@@ -370,12 +365,7 @@ export class FilterEditor {
         </div>
 
         <div class="dlf:tooltip" data-tip="${trans('toggle-not')}" >
-          <button class="dlf-icon-button" data-action="toggle-not">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke-width="1.5" stroke="currentColor" class="dlf:size-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-              </svg>
-          </button>
+          <button class="dlf-icon-button" data-action="toggle-not">N</button>
         </div>
       </div>
     </div>

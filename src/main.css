@@ -95,8 +95,11 @@
 
     
     .dlf-icon-button {
-        @apply dlf:inline-block dlf:rounded-full dlf:border dlf:p-1;
-        @apply dlf:border-neutral-900 dlf:bg-neutral-900 dlf:text-white;
+        @apply dlf:inline-block dlf:rounded-full dlf:border;
+        @apply dlf:aspect-square dlf:w-6;
+        @apply dlf:flex dlf:justify-center dlf:items-center;
+        @apply dlf:border-neutral-900 dlf:bg-neutral-900;
+        @apply dlf:text-white dlf:font-semibold;
         @apply dlf:hover:text-neutral-900 dlf:active:text-neutral-800 dlf:hover:bg-transparent;
         @apply dlf:focus:outline-none dlf:focus:ring;
         @apply dlf:cursor-pointer;
