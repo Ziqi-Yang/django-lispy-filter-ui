@@ -255,7 +255,7 @@ export class FilterEditor {
         throw Error(`${conditionExpr} is a valid LispyConditionExpr!`);
       }
       
-      return this.renderCondition(conditionExpr, true);
+      return this.renderCondition(true, conditionExpr);
     }
 
     const children = subExpressions.map(expr => {
@@ -264,7 +264,7 @@ export class FilterEditor {
       }
       
       return expr[0] == "="
-        ? this.renderCondition(expr as LispyConditionExpr)
+        ? this.renderCondition(false, expr as LispyConditionExpr)
         : this.renderExpression(expr as LispyExpression)
     }).join('');
     
@@ -280,12 +280,14 @@ export class FilterEditor {
         </div>          
         <div>
           <div class="dlf:tooltip" data-tip="${trans('toggle-not')}" >
-            <button class="dlf-icon-button" data-action="toggle-not">N</button>
+            <button class="dlf-icon-button"
+              data-action="toggle-not">${trans(["button-symbol", "N"])}
+            </button>
           </div>
         </div>
       </div>
         
-      <div class="dlf-indent">
+      <div class="dlf-group-body">
         ${children}
         <div class="dlf:relative">
           <div class="dlf:tooltip" data-tip="${trans('add-new')}" >
@@ -315,8 +317,8 @@ export class FilterEditor {
   }
 
   private renderCondition(
+    isNegated: boolean = false,
     condition?: LispyConditionExpr,
-    isNegated: boolean = false
   ): string {
     let conditionInputContainerElem: string | undefined;
     
@@ -365,7 +367,9 @@ export class FilterEditor {
         </div>
 
         <div class="dlf:tooltip" data-tip="${trans('toggle-not')}" >
-          <button class="dlf-icon-button" data-action="toggle-not">N</button>
+          <button class="dlf-icon-button"
+            data-action="toggle-not">${trans(["button-symbol", "N"])}
+          </button>
         </div>
       </div>
     </div>
@@ -455,6 +459,7 @@ export class FilterEditor {
             this.addNewGroup('or', actionContainerElem);
             break;
           case 'add-new-condition':
+            this.addNewCondition(actionContainerElem);
             break;
         }
         
@@ -474,7 +479,9 @@ export class FilterEditor {
   }
 
   private addNewCondition(actionContainerElem: HTMLElement) {
-    // actionContainerElem()
+    const newConditionHTML = this.renderCondition();
+    actionContainerElem.insertAdjacentHTML('beforebegin', newConditionHTML);
+    this.setupNewCascaderSelect();
   }
 
   private toggleNot(btnElem: HTMLElement) {

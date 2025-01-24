@@ -9,6 +9,10 @@
     @apply dlf:w-fit dlf:min-w-24;
 }
 
+.cascader-container_menus {
+    @apply dlf:z-50;
+}
+
 
 /* dlf:tooltip */
 @utility tooltip {
@@ -52,7 +56,7 @@
         @apply dlf:inline;
     }
 
-    .dlf-group:not(.dlf-expanded) .dlf-indent {
+    .dlf-group:not(.dlf-expanded) .dlf-group-body {
         @apply dlf:hidden;
     }
 
@@ -60,7 +64,7 @@
         @apply dlf:inline;
     }
 
-    .dlf-group:not(.dlf-expanded) .dlf-indent + .dlf-parenthesis {
+    .dlf-group:not(.dlf-expanded) .dlf-group-body + .dlf-parenthesis {
         @apply dlf:hidden;
     }
     
@@ -68,7 +72,6 @@
     .dlf-group-prefix {
         @apply dlf:flex dlf:gap-2;
     }
-
     
     
     .dlf-parenthesis {
@@ -89,8 +92,9 @@
         @apply dlf:flex dlf:gap-2 dlf:items-center;
     }
     
-    .dlf-indent {
-        @apply dlf:pl-4 dlf:border-l-2 dlf:border-gray-200;
+    .dlf-group-body {
+        @apply dlf:flex dlf:flex-col dlf:gap-2;
+        @apply dlf:pl-4 dlf:my-2 dlf:border-l-2 dlf:border-gray-200;
     }
 
     

@@ -40,7 +40,10 @@ export const i18n = new I18n({
     "add-new": "Add a new group or condition",
     "add-new-and-group": "Add a new `And` group",
     "add-new-or-group": "Add a new `Or` group",
-    "add-new-condition": "Add a new condition"
+    "add-new-condition": "Add a new condition",
+    "button-symbol": {
+      "N": "N"
+    }
   },
   "zh": { // for all zh (zh-CN, etc.)
     ...zhCN
