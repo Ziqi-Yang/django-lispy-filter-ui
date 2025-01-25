@@ -61,12 +61,12 @@ export class FilterEditor {
    * setup a new CascaderSelect
    */
   private setupNewCascaderSelect(): Cascader | null {
-    const conditionInputContainerElem =
+    const fieldSelectorDivElem =
           document.querySelector(NON_INITIALIZED_FIELD_SELECTER_QUERY);
     
-    if (!conditionInputContainerElem) return null;
+    if (!fieldSelectorDivElem) return null;
 
-    const rawInitialValue = conditionInputContainerElem.getAttribute("data-initial-value");
+    const rawInitialValue = fieldSelectorDivElem.getAttribute("data-initial-value");
     let initialValue: string[] | undefined;
     if (rawInitialValue) {
       initialValue = rawInitialValue.split(",");
@@ -84,9 +84,11 @@ export class FilterEditor {
           // NOTE this function is called every time user clicks
           if (value.length && prevCascaderValue != value) {
             const field = getField(value, this.mainModel, this.schema.models);
-            this.setupLookupSelector(conditionInputContainerElem.parentElement as HTMLElement, field);
+            this.setupLookupSelector(fieldSelectorDivElem.parentElement as HTMLElement, field);
           }
           prevCascaderValue = value;
+
+          fieldSelectorDivElem.setAttribute("data-value", value.toString());
         },
         displayRender(value) {
           return value.join(CASCADER_SPLIT_STR);
@@ -97,10 +99,13 @@ export class FilterEditor {
 
     if (initialValue) {
       const field = getField(initialValue, this.mainModel, this.schema.models);
-      this.setupLookupSelector(conditionInputContainerElem.parentElement as HTMLElement, field);
-      conditionInputContainerElem.removeAttribute("data-initial-value");
+      this.setupLookupSelector(fieldSelectorDivElem.parentElement as HTMLElement, field);
+      fieldSelectorDivElem.removeAttribute("data-initial-value");
+      
+      fieldSelectorDivElem.setAttribute("data-value", initialValue.toString());
     }
-    
+
+    // this.cascaderSelectMap.set(conditionInputContainerElem)
     return cascader;
   }
 
@@ -579,12 +584,11 @@ export class FilterEditor {
     const lookupSelectorDivElem = inputContainerElem.children[1]!;
     const valueInputDivElem = inputContainerElem.lastElementChild!;
 
-    const rawField =
-          fieldSelectorDivElem.querySelector(".cascader-container_value")!.textContent;
+    const rawField = fieldSelectorDivElem.getAttribute("data-value");
     if (!rawField) {
-      throw new Error("Field selector has empty value!");
+      throw new Error("Field selector has not 'data-value` attribute!");
     }
-    const fieldStr = rawField.replace(CASCADER_SPLIT_STR, "__");
+    const fieldStr = rawField.replace(",", "__");
 
     const lookupSelectorElem = lookupSelectorDivElem.firstElementChild as HTMLSelectElement;
     if (!lookupSelectorElem) {
