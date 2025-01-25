@@ -1,5 +1,7 @@
 import './main.css';
 
+import Sortable from 'sortablejs';
+
 import type {
   FilterEditorOptions,
   LispyExpression,
@@ -54,6 +56,20 @@ export class FilterEditor {
     this.setupEventListener();
 
     while (!this.setupNewCascaderSelect()) {}
+
+    this.setupSortableForGroup(this.container.querySelector('.dlf-group-body-conditions')!);
+  }
+
+  private setupSortableForGroup(containerElem: HTMLElement) {
+    Sortable.create(containerElem, {
+      group: "dlf-sortable",  // allow sort for nested elements
+      filter: ".dlf-sortable-ignore",
+      swapThreshold: 0.65,
+      draggable: ".dlf-sortable",
+      ghostClass: "dlf-sortable-ghost",
+      chosenClass: "",
+	    dragClass: "",
+    });
   }
 
   
@@ -278,7 +294,7 @@ export class FilterEditor {
     }).join('');
     
     return `
-    <div class="dlf-group dlf-expanded dlf:group/group">
+    <div class="dlf-group dlf-sortable dlf-expanded dlf:group/group">
       <div class="dlf-group-prefix">
         ${isNegated ? this.renderOperator('not') : ""}
         ${this.renderOperator(operator)}
@@ -293,9 +309,11 @@ export class FilterEditor {
       </div>
         
       <div class="dlf-group-body">
-        ${children}
-        <div class="dlf:relative">
-          <div class="dlf:tooltip" data-tip="${trans('add-new')}" >
+        <div class="dlf-group-body-conditions">
+          ${children}
+        </div>
+        <div class="dlf-group-body-actions dlf:relative dlf:px-2 dlf-sortable-ignore">
+          <div title="${trans('add-new')}" >
             <button class="dlf-icon-button" data-action="add-new">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
@@ -314,7 +332,7 @@ export class FilterEditor {
   private renderOperator(operator: LispyOperator) {
     let tip = trans(["operator-tip", operator]);
     return `
-    <span class="dlf-operator dlf-${operator}-operator dlf:tooltip" data-tip="${tip}"
+    <span class="dlf-operator dlf-${operator}-operator" title="${tip}"
       data-value="${operator}">
       ${trans(["operator", operator])}
     </span>
@@ -355,7 +373,7 @@ export class FilterEditor {
     }
     
     return `
-    <div class="dlf-condition dlf:group/condition">
+    <div class="dlf-condition dlf:group/condition dlf-sortable">
       ${isNegated ? this.renderOperator('not') : ""}
       ${conditionInputContainerElem}
       
@@ -368,7 +386,7 @@ export class FilterEditor {
 
   private renderCommonActions() {
     return `
-<div class="dlf:tooltip" data-tip="${trans('delete')}">
+<div title="${trans('delete')}">
   <button class="dlf-icon-button" data-action="delete">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
       stroke-width="2.5" stroke="currentColor"
@@ -378,7 +396,7 @@ export class FilterEditor {
   </button>
 </div>
 
-<div class="dlf:tooltip" data-tip="${trans('toggle-not')}" >
+<div title="${trans('toggle-not')}" >
   <button class="dlf-icon-button"
     data-action="toggle-not">${trans(["button-symbol", "N"])}
   </button>
@@ -432,6 +450,8 @@ export class FilterEditor {
 
     if (!this.container.firstElementChild!.children.length) {
       this.render(["and"]);
+
+      this.setupSortableForGroup(this.container.querySelector('.dlf-group-body-conditions')!);
     }
   }
 
@@ -473,15 +493,16 @@ export class FilterEditor {
     popupMenuElem.querySelectorAll('a').forEach(menuItem => {
       menuItem.addEventListener('click', () => {
         const action = menuItem.getAttribute("data-action")!;
+        const groupBodyConditionsElem = actionContainerElem.previousElementSibling! as HTMLElement;
         switch (action) {
           case 'add-new-and-group':
-            this.addNewGroup('and', actionContainerElem);
+            this.addNewGroup('and', groupBodyConditionsElem);
             break;
           case 'add-new-or-group':
-            this.addNewGroup('or', actionContainerElem);
+            this.addNewGroup('or', groupBodyConditionsElem);
             break;
           case 'add-new-condition':
-            this.addNewCondition(actionContainerElem);
+            this.addNewCondition(groupBodyConditionsElem);
             break;
         }
         
@@ -494,15 +515,18 @@ export class FilterEditor {
     addNewBtnElem.parentElement!.insertAdjacentElement('afterend', popupMenuElem);
   }
 
-  private addNewGroup(groupType: "and" | "or", actionContainerElem: HTMLElement) {
+  private addNewGroup(groupType: "and" | "or", groupBodyConditionsElem: HTMLElement) {
     const newGroupExpression: [typeof groupType] = [groupType];
     const newGroupRawHTML = this.renderExpression(newGroupExpression);
-    actionContainerElem.insertAdjacentHTML('beforebegin', newGroupRawHTML);
+    groupBodyConditionsElem.insertAdjacentHTML('beforeend', newGroupRawHTML);
+
+    const newGroupElem = groupBodyConditionsElem.lastElementChild!;
+    this.setupSortableForGroup(newGroupElem.querySelector(".dlf-group-body-conditions")!);
   }
 
-  private addNewCondition(actionContainerElem: HTMLElement) {
+  private addNewCondition(groupBodyConditionsElem: HTMLElement) {
     const newConditionHTML = this.renderCondition();
-    actionContainerElem.insertAdjacentHTML('beforebegin', newConditionHTML);
+    groupBodyConditionsElem.insertAdjacentHTML('beforeend', newConditionHTML);
     this.setupNewCascaderSelect();
   }
 

@@ -13,31 +13,12 @@
     @apply dlf:z-50;
 }
 
-
-/* dlf:tooltip */
-@utility tooltip {
-    @apply dlf:relative dlf:inline-block;
-
-    &::before {
-        @apply dlf:absolute dlf:bottom-full dlf:left-1/2 dlf:-translate-x-1/2 dlf:px-2;
-        @apply dlf:py-1 dlf:bg-slate-100 dlf:text-black dlf:text-sm dlf:rounded;
-        @apply dlf:whitespace-nowrap dlf:opacity-0 dlf:invisible dlf:transition-all;
-        @apply dlf:duration-200 dlf:ease-in-out dlf:shadow;
-        content: attr(data-tip);
-    }
-
-    &:hover::before {
-        @apply dlf:opacity-100 dlf:visible;
-    }
-}
-
-
 @layer components {
     .dlf-root-container {}
 
     
     .dlf-group {
-        @apply dlf:relative;
+        @apply dlf:relative dlf:px-2 dlf:py-1 dlf:rounded;
     }
 
     .dlf-group-collapse {
@@ -90,11 +71,16 @@
 
     .dlf-condition {
         @apply dlf:flex dlf:gap-2 dlf:items-center;
+        @apply dlf:px-2 dlf:py-1 dlf:rounded;
     }
     
     .dlf-group-body {
-        @apply dlf:flex dlf:flex-col dlf:gap-2;
-        @apply dlf:pl-4 dlf:my-2 dlf:border-l-2 dlf:border-gray-200;
+        @apply dlf:flex dlf:flex-col dlf:pl-4 dlf:border-l-2 dlf:border-gray-200;
+    }
+
+    .dlf-group-body-conditions {
+        @apply dlf:flex dlf:flex-col dlf:gap-1 dlf:my-2;
+        @apply dlf:min-h-3; /* for easy interaction with sortablejs */
     }
 
     
@@ -145,5 +131,10 @@
                 @apply dlf:cursor-pointer;
             }
         }
+    }
+
+    /* Sortable */
+    .dlf-sortable-ghost {
+        @apply dlf:bg-blue-100;
     }
 }

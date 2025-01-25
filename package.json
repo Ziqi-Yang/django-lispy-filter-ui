@@ -11,9 +11,11 @@
   "dependencies": {
     "@tailwindcss/cli": "^4.0.0",
     "@tailwindcss/postcss": "^4.0.0",
+    "@types/sortablejs": "^1.15.8",
     "cascaderjs": "^3.0.1",
     "i18n-js": "^4.5.1",
-    "postcss-extend-rule": "^4.0.0"
+    "postcss-extend-rule": "^4.0.0",
+    "sortablejs": "^1.15.6"
   },
   "exports": {
     ".": {
