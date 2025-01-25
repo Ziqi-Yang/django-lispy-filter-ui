@@ -273,7 +273,7 @@ export class FilterEditor {
     }).join('');
     
     return `
-    <div class="dlf-group dlf-expanded">
+    <div class="dlf-group dlf-expanded dlf:group/group">
       <div class="dlf-group-prefix">
         ${isNegated ? this.renderOperator('not') : ""}
         ${this.renderOperator(operator)}
@@ -283,7 +283,7 @@ export class FilterEditor {
           <span class="dlf-parenthesis">)</span>
         </div>          
         <div>
-          <div class="dlf:tooltip" data-tip="${trans('toggle-not')}" >
+          <div class="dlf:tooltip dlf:invisible dlf:group-hover/group:visible" data-tip="${trans('toggle-not')}" >
             <button class="dlf-icon-button"
               data-action="toggle-not">${trans(["button-symbol", "N"])}
             </button>
@@ -354,11 +354,11 @@ export class FilterEditor {
     }
     
     return `
-    <div class="dlf-condition dlf:group">
+    <div class="dlf-condition dlf:group/condition">
       ${isNegated ? this.renderOperator('not') : ""}
       ${conditionInputContainerElem}
       
-      <div class="dlf:invisible dlf:group-hover:visible dlf:gap-2 dlf:flex dlf:items-center">
+      <div class="dlf:invisible dlf:group-hover/condition:visible dlf:gap-2 dlf:flex dlf:items-center">
 
         <div class="dlf:tooltip" data-tip="${trans('delete-condition')}">
           <button class="dlf-icon-button" data-action="delete-condition">
