@@ -133,6 +133,15 @@
         }
     }
 
+    .dlf-group > .dlf-group-prefix > .dlf-group-hover-visible {
+        @apply dlf:invisible;
+    }
+
+    .dlf-group:hover > .dlf-group-prefix > .dlf-group-hover-visible {
+        @apply dlf:visible;
+    }
+
+    
     /* Sortable */
     .dlf-sortable-ghost {
         @apply dlf:bg-blue-100;

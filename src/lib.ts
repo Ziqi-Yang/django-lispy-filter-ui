@@ -303,7 +303,7 @@ export class FilterEditor {
           <span class="dlf-ellipsis">...</span>
           <span class="dlf-parenthesis">)</span>
         </div>          
-        <div class="dlf:invisible dlf:group-hover/group:visible dlf:gap-2 dlf:flex dlf:items-center">
+        <div class="dlf-group-hover-visible dlf:gap-2 dlf:flex dlf:items-center">
           ${this.renderCommonActions()}
         </div>
       </div>
@@ -577,9 +577,9 @@ export class FilterEditor {
     });
 
     // Parse all conditions and nested groups
-    const groupBodyElem = groupElem.querySelector('.dlf-group-body')!;
+    const groupBodyConditionsElem = groupElem.querySelector('.dlf-group-body-conditions')!;
 
-    const children = Array.from(groupBodyElem.children)
+    const children = Array.from(groupBodyConditionsElem.children)
       .filter(child => 
         child.classList.contains('dlf-condition') || 
         child.classList.contains('dlf-group')
