@@ -50,7 +50,7 @@ export class FilterEditor {
   }
 
   private init() {
-    this.render();
+    this.render(this.expression);
     this.setupEventListener();
 
     while (!this.setupNewCascaderSelect()) {}
@@ -230,10 +230,10 @@ export class FilterEditor {
     valueInputDivElem.replaceChildren(valueInputElem);
   }
 
-  private render() {
+  private render(expression: LispyExpression) {
     this.container.innerHTML = `
     <div class="dlf-root-container">
-      ${this.renderExpression(this.expression)}
+      ${this.renderExpression(expression)}
     </div>
     `;
   }
@@ -282,12 +282,8 @@ export class FilterEditor {
           <span class="dlf-ellipsis">...</span>
           <span class="dlf-parenthesis">)</span>
         </div>          
-        <div>
-          <div class="dlf:tooltip dlf:invisible dlf:group-hover/group:visible" data-tip="${trans('toggle-not')}" >
-            <button class="dlf-icon-button"
-              data-action="toggle-not">${trans(["button-symbol", "N"])}
-            </button>
-          </div>
+        <div class="dlf:invisible dlf:group-hover/group:visible dlf:gap-2 dlf:flex dlf:items-center">
+          ${this.renderCommonActions()}
         </div>
       </div>
         
@@ -359,25 +355,30 @@ export class FilterEditor {
       ${conditionInputContainerElem}
       
       <div class="dlf:invisible dlf:group-hover/condition:visible dlf:gap-2 dlf:flex dlf:items-center">
-
-        <div class="dlf:tooltip" data-tip="${trans('delete-condition')}">
-          <button class="dlf-icon-button" data-action="delete-condition">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-              stroke-width="2.5" stroke="currentColor"
-              class="dlf:size-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        <div class="dlf:tooltip" data-tip="${trans('toggle-not')}" >
-          <button class="dlf-icon-button"
-            data-action="toggle-not">${trans(["button-symbol", "N"])}
-          </button>
-        </div>
+        ${this.renderCommonActions()}
       </div>
     </div>
     `;
+  }
+
+  private renderCommonActions() {
+    return `
+<div class="dlf:tooltip" data-tip="${trans('delete')}">
+  <button class="dlf-icon-button" data-action="delete">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+      stroke-width="2.5" stroke="currentColor"
+      class="dlf:size-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+    </svg>
+  </button>
+</div>
+
+<div class="dlf:tooltip" data-tip="${trans('toggle-not')}" >
+  <button class="dlf-icon-button"
+    data-action="toggle-not">${trans(["button-symbol", "N"])}
+  </button>
+</div>
+`;
   }
 
   private setupEventListener() {
@@ -398,13 +399,13 @@ export class FilterEditor {
 
         switch (action) {
           case 'add-new':
-            this.addNew(btnElem);
+            this.actionAddNew(btnElem);
             break;
-          case 'delete-condition':
-            console.log('delete');
+          case 'delete':
+            this.actionDelete(btnElem);
             break;
           case 'toggle-not':
-            this.toggleNot(btnElem);
+            this.actionToggleNot(btnElem);
             break;
         }
         return;
@@ -417,7 +418,19 @@ export class FilterEditor {
     });
   }
 
-  private addNew(addNewBtnElem: HTMLElement) {
+  private actionDelete(btnElem: HTMLElement) {
+    let parentElem = btnElem.closest(".dlf-condition");
+    if (!parentElem) {
+      parentElem = btnElem.closest(".dlf-group")!;
+    }
+    parentElem.remove();
+
+    if (!this.container.firstElementChild!.children.length) {
+      this.render(["and"]);
+    }
+  }
+
+  private actionAddNew(addNewBtnElem: HTMLElement) {
     const actionContainerElem = addNewBtnElem!.parentElement!.parentElement!;
     if (actionContainerElem.querySelector(".dlf-popup-menu")) return;
     
@@ -488,7 +501,7 @@ export class FilterEditor {
     this.setupNewCascaderSelect();
   }
 
-  private toggleNot(btnElem: HTMLElement) {
+  private actionToggleNot(btnElem: HTMLElement) {
     const closestConditionElem = btnElem.closest(".dlf-condition");
     let parentElem = null;
     if (closestConditionElem) {
@@ -507,11 +520,7 @@ export class FilterEditor {
       parentElem.insertAdjacentHTML('afterbegin', this.renderOperator("not"));
     }
   }
-
-
-
   
-
   public toJson(): LispyExpression {
     const rootGroup = this.container.querySelector('.dlf-group') as HTMLElement;
     if (!rootGroup) {
@@ -547,7 +556,6 @@ export class FilterEditor {
         child.classList.contains('dlf-group')
       )
       .map(child => {
-        console.log(child);
         if (child.classList.contains('dlf-condition')) {
           return this.parseCondition(child as HTMLElement);
         } else {

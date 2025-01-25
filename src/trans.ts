@@ -15,7 +15,7 @@ export const i18n = new I18n({
       "or": "Or",
       "xor": "Xor",
     },
-    "delete-condition": "Delete this condition",
+    "delete": "Delete",
     "toggle-not": "Toggle not operator",
     "fieldSelector": {
       "placeholder": "Select a field"
