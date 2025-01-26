@@ -1,5 +1,6 @@
 @layer theme, base, components, utilities;
 @import "tailwindcss" source("./");
+@import "../dist/lib.css";
 
 main {
     @apply p-3;
