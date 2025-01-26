@@ -2,13 +2,40 @@
   "operator": {
     "not": "否",
     "and": "同时满足",
-    "or": "其一满足",
-    "xor": "异或满足"
+    "or": "其一满足"
   },
   "operator-tip": {
-    "not": "否",
-    "and": "",
-    "or": "",
-    "xor": ""
-  }
+    "not": "对条件的否定/取反",
+    "and": "同时满足括号内的所有条件",
+    "or": "满足括号内的条件之一"
+  },
+  "delete": "删除",
+  "toggle-not": "切换“否”符号",
+  "fieldSelector": {
+    "placeholder": "请选择一个字段"
+  },
+  "lookup": {
+    "exact": "等于",
+    "iexact": "等于（不区分大小写）",
+    "isnull": "为空",
+    "gt": "大于",
+    "gte": "大于或等于",
+    "lt": "小于",
+    "lte": "小于或等于",
+    "contains": "包含",
+    "icontains": "包含（不区分大小写）",
+    "startswith": "以...开始",
+    "istartswith": "以...开始（不区分大小写）",
+    "endswith": "以...结束",
+    "iendswith": "以...结束（不区分大小写）",
+    "regex": "正则表达式匹配",
+    "iregex": "正则表达式匹配（不区分大小写）"
+  },
+  "add-new": "创建一个新的条件或条件集合",
+  "add-new-and-group": "创建“同时满足”条件集合",
+  "add-new-or-group": "创建“其一满足”条件集合",
+  "add-new-condition": "创建一个新的条件",
+  "button-symbol": {
+      "N": "否"
+    }
 }
