@@ -3,18 +3,14 @@
   "version": "0.1.0",
   "author": "Meow King",
   "description": "Create Filter Editor UI for django-lispy-filter.",
-  "keywords": ["typescript", "django", "filter"],
+  "keywords": ["typescript", "django", "filter", "UI"],
   "license": "MIT",
   "main": "dist/lib.js",
   "types": "dist/lib.d.ts",
   "files": ["dist"],
   "dependencies": {
-    "@tailwindcss/cli": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0",
-    "@types/sortablejs": "^1.15.8",
     "cascaderjs": "^3.0.1",
     "i18n-js": "^4.5.1",
-    "postcss-extend-rule": "^4.0.0",
     "sortablejs": "^1.15.6"
   },
   "exports": {
@@ -25,6 +21,10 @@
     }
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "postcss-extend-rule": "^4.0.0",
+    "@types/sortablejs": "^1.15.8",
     "@types/bun": "latest",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.1",
